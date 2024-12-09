@@ -129,18 +129,6 @@ yarn db:migrate
 
 This will create the tables defined in your Sequelize models.
 
-### Authentication
-
-- User authentication is handled via **JWT** tokens. After registering or logging in, a JWT token is generated and returned to the client for session management.
-
----
-
-## Frontend Setup
-
-The frontend is built using **Next.js (App Router)** and **Tailwind CSS** for styling. It provides a simple interface where users can register, log in, create boards, and manage work items.
-
----
-
 ## Database Setup
 
 - The database used is **SQLite** for local development, defined in the `server/config/db.ts` file. If you want to migrate to **PostgreSQL**, you can modify the database connection URL in the `.env` file and update the Sequelize configurations accordingly.
@@ -152,13 +140,3 @@ yarn db:reset
 ```
 
 This will drop the tables and re-sync them.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-Let me know if you need to add or modify any sections! This should provide a good starting point for developers to get up and running with the project. 😊
