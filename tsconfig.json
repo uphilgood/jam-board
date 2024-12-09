@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "rootDir": "./",
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["./app/*"],
+      "@server/*": ["./server/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

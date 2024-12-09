@@ -1,0 +1,65 @@
+# Node.js
+**/node_modules/
+
+# Build output directories
+/dist/
+/client/dist/
+/server/dist/
+
+/out/           # TypeScript build directory for the whole project
+/client/out/
+/server/out/
+
+# TypeScript
+*.tsbuildinfo      # TypeScript incremental build info
+*.d.ts             # TypeScript type declaration files (optional, if not needed)
+tsconfig.tsbuildinfo
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# IDEs and Editors
+.vscode/
+.idea/
+
+# OS-generated files
+.DS_Store        # macOS Finder specific
+Thumbs.db        # Windows specific
+
+# dotenv environment variable files
+.env             # Ignore the .env file where sensitive data may be stored
+.env.local
+.env.*.local
+
+# Package lock files (optional, based on your project policy)
+# You can ignore lock files if you're using a single lockfile at the root, or if you have separate ones.
+# /client/package-lock.json
+# /server/package-lock.json
+# /client/yarn.lock
+# /server/yarn.lock
+
+# Ignore build tools like Parcel, Webpack, etc.
+.cache/
+.parcel-cache/
+
+# Next.js (client-side)
+.next/
+
+# Next.js (server-side)
+/server/.next/
+
+# Test Coverage output
+/coverage/
+
+# Jest configuration
+/jest-coverage/
+
+# Firebase functions (if applicable)
+/functions/.firebase/
+
+# .env files for storing environment variables
+.env*          # To keep sensitive environment variables out of the repo
+
+next-env.d.ts
