@@ -14,7 +14,6 @@ This README will guide you through the process of setting up your development en
   - [4. Run the Application](#4-run-the-application)
 - [Project Structure](#project-structure)
 - [Backend Setup](#backend-setup)
-- [Frontend Setup](#frontend-setup)
 - [Database Setup](#database-setup)
 - [License](#license)
 
