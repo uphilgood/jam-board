@@ -16,10 +16,13 @@ export default function LoginPage() {
     setError(null); // Reset error state
 
     try {
-      const response = await axios.post("/api/auth/login", {
-        username,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        {
+          username,
+          password,
+        }
+      );
       const { token } = response.data;
 
       // Save the token to localStorage (or cookie if preferred)
