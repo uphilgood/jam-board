@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import React from "react";
+import { useAuth } from "../contexts/authContext";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,10 +25,11 @@ export default function LoginPage() {
           password,
         }
       );
-      const { token } = response.data;
+      const { token, user } = response.data;
 
       // Save the token to localStorage (or cookie if preferred)
-      localStorage.setItem("token", token);
+
+      login(token, user);
 
       // Redirect to the dashboard or boards page
       router.push("/boards");

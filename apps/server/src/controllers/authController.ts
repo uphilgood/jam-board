@@ -36,20 +36,24 @@ export const register: RequestHandler = async (
 export const login: RequestHandler = async (
   req: Request,
   res: Response
-): Promise<void> => {
-  const { email, password } = req.body;
+): Promise<any> => {
+  const { username, password } = req.body;
 
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { username } });
 
     if (!user || !(await user.validatePassword(password))) {
-      res.status(401).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     // Generate a JWT token
-    const token = jwt.sign({ userId: user.id, email: user.email }, SECRET_KEY, {
-      expiresIn: "1h", // Token expires in 1 hour
-    });
+    const token = jwt.sign(
+      { userId: user.id, username: user.username },
+      SECRET_KEY,
+      {
+        expiresIn: "1h", // Token expires in 1 hour
+      }
+    );
 
     // Set the token as a cookie (HTTP-only and secure in production)
     res.cookie("token", token, {
@@ -58,7 +62,7 @@ export const login: RequestHandler = async (
       maxAge: 3600000, // 1 hour
     });
 
-    res.json({ message: "Login successful", token });
+    res.json({ message: "Login successful", token, user });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error" });

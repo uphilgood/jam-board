@@ -1,9 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useAuth } from "./contexts/authContext";
+import { useEffect } from "react";
 
 export default function HomePage() {
   const router = useRouter();
+  const { login, user, token } = useAuth();
+
+  useEffect(() => {
+    if (user?.username) {
+      router.push("/boards");
+    }
+  }, [user?.username]);
 
   const handleGetStarted = () => {
     router.push("/login");
