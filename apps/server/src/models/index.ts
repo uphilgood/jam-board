@@ -1,23 +1,20 @@
 import User from "./User";
 import Board from "./Board";
 import WorkItem from "./WorkItem";
+import UserBoard from "./UserBoard";
 
 const setupAssociations = () => {
-  // A User can have multiple Boards
-  User.hasMany(Board, { foreignKey: "userId", as: "boards" });
-  Board.belongsTo(User, { foreignKey: "userId", as: "creator" });
+  // models/User.ts
+  User.hasMany(UserBoard, { foreignKey: "userId" });
+  User.belongsToMany(Board, { through: UserBoard, foreignKey: "userId" });
 
-  // A Board can have many WorkItems
-  Board.hasMany(WorkItem, { foreignKey: "boardId", as: "workItems" });
-  WorkItem.belongsTo(Board, { foreignKey: "boardId", as: "board" });
+  // models/Board.ts
+  Board.hasMany(UserBoard, { foreignKey: "boardId" });
+  Board.belongsToMany(User, { through: UserBoard, foreignKey: "boardId" });
 
-  // A User can create many WorkItems
-  User.hasMany(WorkItem, { foreignKey: "createdBy", as: "createdWorkItems" });
-  WorkItem.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
-
-  // A User can be assigned to many WorkItems
-  User.hasMany(WorkItem, { foreignKey: "assignedTo", as: "assignedWorkItems" });
-  WorkItem.belongsTo(User, { foreignKey: "assignedTo", as: "assignee" });
+  // models/UserBoard.ts
+  UserBoard.belongsTo(User, { foreignKey: "userId" });
+  UserBoard.belongsTo(Board, { foreignKey: "boardId" });
 };
 
-export { User, Board, WorkItem, setupAssociations };
+export { User, Board, WorkItem, setupAssociations, UserBoard };

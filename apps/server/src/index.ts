@@ -5,6 +5,7 @@ import { setupAssociations } from "./models";
 import * as cors from "cors";
 
 import authRoutes from "./routes/authRoutes";
+import boardRoutes from "./routes/boardRoutes";
 
 dotenv.config(); // Load environment variables
 
@@ -16,6 +17,11 @@ setupAssociations(); // Setup model associations
 const port = process.env.PORT || 4000;
 // Register auth routes
 app.use("/auth", authRoutes); // Routes for /auth/register and /auth/login
+// Use board routes
+app.use("/boards", boardRoutes);
+
+// use getBoards
+app.use("/", boardRoutes);
 
 const startServer = async () => {
   try {
