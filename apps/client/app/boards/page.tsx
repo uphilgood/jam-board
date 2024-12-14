@@ -133,7 +133,7 @@ export default function BoardPage() {
               {boards.map((board) => (
                 <div
                   key={board.id}
-                  className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition"
+                  className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition break-words"
                 >
                   <h3 className="text-lg font-semibold mb-2">{board.name}</h3>
                   {board.description && (
