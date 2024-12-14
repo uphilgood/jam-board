@@ -1,24 +1,26 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setupAssociations = exports.WorkItem = exports.Board = exports.User = void 0;
-var User_1 = require("./User");
+exports.UserBoard = exports.setupAssociations = exports.WorkItem = exports.Board = exports.User = void 0;
+const User_1 = __importDefault(require("./User"));
 exports.User = User_1.default;
-var Board_1 = require("./Board");
+const Board_1 = __importDefault(require("./Board"));
 exports.Board = Board_1.default;
-var WorkItem_1 = require("./WorkItem");
+const WorkItem_1 = __importDefault(require("./WorkItem"));
 exports.WorkItem = WorkItem_1.default;
-var setupAssociations = function () {
-    // A User can have multiple Boards
-    User_1.default.hasMany(Board_1.default, { foreignKey: "userId", as: "boards" });
-    Board_1.default.belongsTo(User_1.default, { foreignKey: "userId", as: "creator" });
-    // A Board can have many WorkItems
-    Board_1.default.hasMany(WorkItem_1.default, { foreignKey: "boardId", as: "workItems" });
-    WorkItem_1.default.belongsTo(Board_1.default, { foreignKey: "boardId", as: "board" });
-    // A User can create many WorkItems
-    User_1.default.hasMany(WorkItem_1.default, { foreignKey: "createdBy", as: "createdWorkItems" });
-    WorkItem_1.default.belongsTo(User_1.default, { foreignKey: "createdBy", as: "creator" });
-    // A User can be assigned to many WorkItems
-    User_1.default.hasMany(WorkItem_1.default, { foreignKey: "assignedTo", as: "assignedWorkItems" });
-    WorkItem_1.default.belongsTo(User_1.default, { foreignKey: "assignedTo", as: "assignee" });
+const UserBoard_1 = __importDefault(require("./UserBoard"));
+exports.UserBoard = UserBoard_1.default;
+const setupAssociations = () => {
+    // models/User.ts
+    User_1.default.hasMany(UserBoard_1.default, { foreignKey: "userId" });
+    User_1.default.belongsToMany(Board_1.default, { through: UserBoard_1.default, foreignKey: "userId" });
+    // models/Board.ts
+    Board_1.default.hasMany(UserBoard_1.default, { foreignKey: "boardId" });
+    Board_1.default.belongsToMany(User_1.default, { through: UserBoard_1.default, foreignKey: "boardId" });
+    // models/UserBoard.ts
+    UserBoard_1.default.belongsTo(User_1.default, { foreignKey: "userId" });
+    UserBoard_1.default.belongsTo(Board_1.default, { foreignKey: "boardId" });
 };
 exports.setupAssociations = setupAssociations;
