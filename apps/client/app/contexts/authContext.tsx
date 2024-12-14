@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useState, useEffect, useContext } from "react";
+import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
 // Type definitions for the user and context
@@ -18,17 +19,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Retrieve the token and user from localStorage (or cookie)
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    // Retrieve the token and user from cookies
+    const storedToken = Cookies.get("token");
+    const storedUser = Cookies.get("user");
 
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -37,18 +36,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const login = (newToken: string, newUser: User) => {
-    // Store token and user in localStorage (or cookie)
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("user", JSON.stringify(newUser));
+    // Store token and user in cookies (optionally mark them as HttpOnly via the API)
+    Cookies.set("token", newToken, {
+      expires: 7,
+      secure: true,
+      sameSite: "Strict",
+    });
+    Cookies.set("user", JSON.stringify(newUser), {
+      expires: 7,
+      secure: true,
+      sameSite: "Strict",
+    });
 
     setToken(newToken);
     setUser(newUser);
   };
 
   const logout = () => {
-    // Remove token and user from localStorage (or cookie)
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    // Remove token and user from cookies
+    Cookies.remove("token");
+    Cookies.remove("user");
 
     setToken(null);
     setUser(null);
