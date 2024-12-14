@@ -1,16 +1,22 @@
 import { Request, Response } from "express";
-import { UserBoard } from "../models";
+import { User, UserBoard } from "../models";
 
 /**
  * Add a user to a board
  */
 export const addUserToBoard = async (req: Request, res: Response) => {
   try {
-    const { boardId, userId, role = "member" } = req.body; // role defaults to "member"
+    const { boardId, username, role = "member" } = req.body; // role defaults to "member"
+
+    const user = await User.findOne({ where: { username } });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     // Check if the user is already associated with the board
     const existingEntry = await UserBoard.findOne({
-      where: { userId, boardId },
+      where: { userId: user.id, boardId },
     });
     if (existingEntry) {
       return res
@@ -19,7 +25,7 @@ export const addUserToBoard = async (req: Request, res: Response) => {
     }
 
     // Create a new UserBoard entry
-    await UserBoard.create({ userId, boardId, role });
+    await UserBoard.create({ userId: user.id, boardId, role });
 
     res.status(201).json({ message: "User added to board successfully" });
   } catch (error) {

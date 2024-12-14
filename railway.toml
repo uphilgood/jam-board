@@ -1,0 +1,8 @@
+# railway.toml
+
+[services]
+  [services.client]
+  path = "apps/client"
+
+  [services.server]
+  path = "apps/server"

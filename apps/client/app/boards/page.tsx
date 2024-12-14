@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../contexts/authContext";
+<<<<<<< HEAD
 import { redirect } from "next/navigation";
+=======
+import { useRouter } from "next/navigation";
+>>>>>>> @{-1}
 
 interface Board {
   id: number;
@@ -18,8 +22,12 @@ export default function BoardPage() {
   const [newBoardName, setNewBoardName] = useState<string>("");
   const [newBoardDescription, setNewBoardDescription] = useState<string>("");
 
+  const router = useRouter();
+
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      return router.push("/login");
+    }
 
     // Fetch boards for the user
     const fetchBoards = async () => {
@@ -129,8 +137,7 @@ export default function BoardPage() {
               {boards.map((board) => (
                 <div
                   key={board.id}
-                  onClick={() => redirect(`boards/${board.id}`)}
-                  className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition"
+                  className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition break-words"
                 >
                   <h3 className="text-lg font-semibold mb-2">{board.name}</h3>
                   {board.description && (
