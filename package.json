@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "concurrently \"yarn --cwd apps/server dev\" \"yarn --cwd apps/client dev\"",
     "build": "yarn workspaces run build",
-    "lint": "yarn workspaces run lint"
+    "lint": "yarn workspaces run lint",
+    "start": "yarn workspaces run start"
   },
   "license": "MIT",
   "devDependencies": {
