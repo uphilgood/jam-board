@@ -1,8 +1,8 @@
-import * as express from "express";
+import express from "express";
 import * as dotenv from "dotenv";
 import sequelize from "./config/db";
 import { setupAssociations } from "./models";
-import * as cors from "cors";
+import cors from "cors";
 
 import authRoutes from "./routes/authRoutes";
 import boardRoutes from "./routes/boardRoutes";
