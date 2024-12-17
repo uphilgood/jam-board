@@ -1,10 +1,13 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { User, UserBoard } from "../models";
 
 /**
  * Add a user to a board
  */
-export const addUserToBoard = async (req: Request, res: Response) => {
+export const addUserToBoard: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { boardId, username, role = "member" } = req.body; // role defaults to "member"
 
