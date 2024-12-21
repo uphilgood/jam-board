@@ -131,7 +131,7 @@ export const deleteWorkItem: RequestHandler = async (
     if (!workItemId) {
       return res
         .status(400)
-        .json({ message: "workItem ID and boardId are required" });
+        .json({ message: "workItem ID are required" });
     }
 
     // Delete the work item from the database
