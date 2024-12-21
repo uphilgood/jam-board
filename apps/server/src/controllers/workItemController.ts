@@ -47,6 +47,7 @@ export const createWorkItem: RequestHandler = async (
       description: description || null,
       status: status || null,
       assignedTo: assignedTo || null,
+      createdBy: userId,
       boardId, // Assuming `boardId` is a field on the WorkItem model
     });
 

@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/db";
+import WorkItem from "./WorkItem";
 
 // Define the attributes for the Board
 interface BoardAttributes {
@@ -27,6 +28,7 @@ class Board
   // Timestamps
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+  workItems: any;
 }
 
 Board.init(
