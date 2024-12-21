@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes";
 import boardRoutes from "./routes/boardRoutes";
 import userBoardRoutes from "./routes/userBoardRoutes";
 import workItemRoutes from "./routes/workItemRoutes";
+import userRoutes from "./routes/userRoutes";
 
 dotenv.config(); // Load environment variables
 
@@ -24,6 +25,8 @@ app.use("/boards", boardRoutes);
 
 app.use("/userBoards", userBoardRoutes);
 app.use("/workItems", workItemRoutes);
+// Use user routes
+app.use("/users", userRoutes);
 
 // use getBoards
 app.use("/", boardRoutes);

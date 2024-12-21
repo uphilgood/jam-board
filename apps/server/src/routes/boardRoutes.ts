@@ -1,5 +1,5 @@
 import * as express from "express";
-import { createBoard, getBoardById, getBoards } from "../controllers/boardController";
+import { createBoard, getBoardById, getBoards, deleteBoard } from "../controllers/boardController";
 
 const router = express.Router();
 
@@ -11,5 +11,8 @@ router.get("/board", getBoardById);
 
 // Route to create a new board
 router.post("/", createBoard);
+
+// Route to delete a new board
+router.delete("/", deleteBoard);
 
 export default router;

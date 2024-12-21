@@ -244,6 +244,7 @@ const JiraBoard: React.FC = () => {
                       )}
                     </Draggable>
                   ))}
+                  {provided.placeholder}
 
                   <div
                     onClick={() => handleOpenModal({status: column.status})}
