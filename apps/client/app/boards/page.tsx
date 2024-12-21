@@ -31,6 +31,7 @@ export default function BoardPage() {
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/boards?userId=${user.id}`
         );
+        console.log('response.data.boards', response.data.boards)
         setBoards(response.data.boards);
       } catch (error) {
         console.error("Error fetching boards:", error);
