@@ -3,13 +3,13 @@ import React, { useState } from 'react'
 import { useAuth } from '../contexts/authContext';
 import { useParams } from 'next/navigation';
 
-export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseModal, handleCreate }) => {
+export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseModal, handleCreate, handleDelete }) => {
     const { user } = useAuth();
     const { boardId } = useParams();
     const [title, setTitle] = useState(selectedTask?.title ?? "")
     const [description, setDescription] = useState(selectedTask?.description ?? "")
     const isNew = selectedTask ? false : true
-    const handleUpdate = async () => {
+    const handleUpdateWorkItem = async () => {
         try {
             const response = await axios.put(
                 `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
@@ -45,6 +45,21 @@ export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseMod
             // Handle success (you can update the state with the response if needed)
             console.log('WorkItem status updated successfully:', response.data);
             handleCreate(response.data.workItem)
+        } catch (error) {
+            console.error("Error updating WorkItem status:", error);
+        }
+    }
+    const handleDeleteWorkItem = async () => {
+        try {
+            const response = await axios.delete(
+                `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
+                {
+                    data: { workItemId: selectedTask.id },
+                }
+            );
+            // Handle success (you can update the state with the response if needed)
+            console.log('WorkItem removed successfully:', response.data);
+            handleDelete(selectedTask.id)
         } catch (error) {
             console.error("Error updating WorkItem status:", error);
         }
@@ -92,12 +107,20 @@ export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseMod
                     onClick={handleCreateWorkItem}
                 >
                     Create
-                </button> : <button
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md"
-                    onClick={handleUpdate}
-                >
-                    Save
-                </button>}
+                </button> : <div className="flex justify-end items-center gap-2">
+                    <button
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md"
+                        onClick={handleUpdateWorkItem}
+                    >
+                        Save
+                    </button>
+                    <button
+                        className="p-2 text-red-500 hover:text-red-700"
+                        onClick={handleDeleteWorkItem}
+                        title="Delete"
+                    >
+                        Delete
+                    </button></div>}
             </div>
         </div>
     )

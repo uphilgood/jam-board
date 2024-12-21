@@ -95,3 +95,31 @@ export const updateWorkItem: RequestHandler = async (
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const deleteWorkItem: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { workItemId } = req.body;
+
+    // Validate the input
+    if (!workItemId) {
+      return res
+        .status(400)
+        .json({ message: "workItem ID and boardId are required" });
+    }
+
+    // Delete the work item from the database
+    const deletedWorkItem = await WorkItem.destroy({
+      where: { id: workItemId },
+    });
+
+    res
+      .status(200)
+      .json({ message: "Work item removed successfully", deletedWorkItem });
+  } catch (error) {
+    console.error("Error updating workItem:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

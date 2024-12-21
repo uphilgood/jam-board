@@ -131,6 +131,16 @@ const JiraBoard: React.FC = () => {
     handleCloseModal()
   }
 
+  const handleDelete = (workItemId) => {
+    setColumns((prevColumns) =>
+      prevColumns.map((column) => ({
+        ...column,
+        tasks: column.tasks.filter((task) => task.id !== workItemId),
+      }))
+    );
+    handleCloseModal()
+  }
+
   const onDragEnd = async (result: any) => {
     const { source, destination } = result;
   
@@ -258,7 +268,7 @@ const JiraBoard: React.FC = () => {
           </div>
         ))}
       </DragDropContext>
-      {isModalOpen ? <Modal selectedColumn={selectedColumn} handleEdit={handleEdit} selectedTask={selectedTask} handleCloseModal={handleCloseModal} handleCreate={handleCreate} /> : null}
+      {isModalOpen ? <Modal selectedColumn={selectedColumn} handleEdit={handleEdit} selectedTask={selectedTask} handleCloseModal={handleCloseModal} handleCreate={handleCreate} handleDelete={handleDelete} /> : null}
     </div>
   );
 };
