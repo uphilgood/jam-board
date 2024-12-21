@@ -237,7 +237,7 @@ export default function BoardPage() {
                 <div
                   onClick={() => router.push(`/boards/${board.id}`)}
                   key={board.id}
-                  className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition break-words flex flex-col justify-between h-full"
+                  className="bg-white cursor-pointer shadow-md rounded-lg p-4 hover:shadow-xl transition break-words flex flex-col justify-between h-full"
                 >
                   <h3 className="text-lg font-semibold mb-2">{board.name}</h3>
 
