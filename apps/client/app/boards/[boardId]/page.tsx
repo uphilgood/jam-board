@@ -75,7 +75,7 @@ const JiraBoard: React.FC = () => {
     const fetchBoards = async () => {
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/boards/board?userId=${user.id}&boardId=${boardId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/workItems/items?userId=${user.id}&boardId=${boardId}`
         );
         const newColumns = columns.map((column) => {
           return {

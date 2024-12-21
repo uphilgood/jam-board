@@ -2,12 +2,14 @@ import axios from 'axios';
 import React, { useState } from 'react'
 import { useAuth } from '../contexts/authContext';
 import { useParams } from 'next/navigation';
+import { DeleteModal } from './DeleteModal';
 
 export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseModal, handleCreate, handleDelete }) => {
     const { user } = useAuth();
     const { boardId } = useParams();
     const [title, setTitle] = useState(selectedTask?.title ?? "")
     const [description, setDescription] = useState(selectedTask?.description ?? "")
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const isNew = selectedTask ? false : true
     const handleUpdateWorkItem = async () => {
         try {
@@ -21,7 +23,7 @@ export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseMod
                 }
             );
             // Handle success (you can update the state with the response if needed)
-            console.log('WorkItem status updated successfully:', response.data);
+            console.log('WorkItem updated successfully:', response.data);
             handleEdit({
                 ...selectedTask,
                 title, description
@@ -43,12 +45,17 @@ export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseMod
                 }
             );
             // Handle success (you can update the state with the response if needed)
-            console.log('WorkItem status updated successfully:', response.data);
+            console.log('WorkItem created successfully:', response.data);
             handleCreate(response.data.workItem)
         } catch (error) {
             console.error("Error updating WorkItem status:", error);
         }
     }
+
+    const handleOpenDeleteModal = () => {
+        setIsDeleteModalOpen(true)
+    }
+
     const handleDeleteWorkItem = async () => {
         try {
             const response = await axios.delete(
@@ -59,6 +66,7 @@ export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseMod
             );
             // Handle success (you can update the state with the response if needed)
             console.log('WorkItem removed successfully:', response.data);
+            setIsDeleteModalOpen(false)
             handleDelete(selectedTask.id)
         } catch (error) {
             console.error("Error updating WorkItem status:", error);
@@ -76,9 +84,9 @@ export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseMod
                 </button>
 
                 {/* Modal Content */}
-                <h2 className="text-xl font-bold mb-4">Edit Task</h2>
-                <div className="mb-4">
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                <h2 className="text-xl font-bold mb-4">{isNew ? "Add New Work Item" : "Edit Work Item"}</h2>
+                <div className="mb-6">
+                    <label htmlFor="title" className="block text-lg font-semibold text-gray-800 mb-2">
                         Title
                     </label>
                     <input
@@ -86,20 +94,25 @@ export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseMod
                         id="title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out"
+                        placeholder="Enter title"
                     />
                 </div>
-                <div className="mb-4">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+
+                <div className="mb-6">
+                    <label htmlFor="description" className="block text-lg font-semibold text-gray-800 mb-2">
                         Description
                     </label>
                     <textarea
                         id="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out"
+                        placeholder="Enter description"
+                        rows={5}
                     />
                 </div>
+
 
                 {/* Save Button */}
                 {isNew ? <button
@@ -116,12 +129,13 @@ export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseMod
                     </button>
                     <button
                         className="p-2 text-red-500 hover:text-red-700"
-                        onClick={handleDeleteWorkItem}
+                        onClick={handleOpenDeleteModal}
                         title="Delete"
                     >
                         Delete
                     </button></div>}
             </div>
+            {isDeleteModalOpen ? <DeleteModal handleCancel={() => setIsDeleteModalOpen(false)} handleDelete={handleDeleteWorkItem} /> : null}
         </div>
     )
 

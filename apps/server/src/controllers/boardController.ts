@@ -31,46 +31,6 @@ export const getBoards: RequestHandler = async (
 };
 
 /**
- * Get all boards that a user has access to
- * @route GET /boards?userId=1&boardId=1
- */
-export const getBoardById: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  const { userId, boardId } = req.query;
-
-  if (!userId) {
-    return res.status(400).json({ message: "User ID is required" });
-  }
-
-  if (!boardId) {
-    return res.status(400).json({ message: "Board ID is required" });
-  }
-
-  try {
-    const board = await Board.findOne({
-      attributes: ["name", "description"],
-      include: [{
-        model: UserBoard,
-        where: { userId: userId, id: boardId },
-      },
-      {
-        model: WorkItem,
-        where: {boardId: boardId},
-        as: "workItems",
-        required: false,
-      }],
-    });
-
-    res.status(200).json({ board, workItems: board!.workItems });
-  } catch (error) {
-    console.error("Error fetching boards:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-/**
  * Create a new board and associate it with the creator in the UserBoard table
  * @route POST /boards
  * @param {Request} req - The request object

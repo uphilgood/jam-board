@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
 import User from "../models/User";
+import { UserBoard } from "../models";
 
 /**
  * Controller to search for users by a query (username or email).
@@ -9,8 +10,6 @@ import User from "../models/User";
  */
 export const searchUsers = async (req: Request, res: Response): Promise<void> => {
   const { searchQuery } = req.query;
-
-  console.log('searchQuery', searchQuery)
   // If no search query is provided or it's not a string, return an error
   if (!searchQuery || typeof searchQuery !== "string") {
     res.status(400).json({ message: "Search query must be a string." });
@@ -35,6 +34,10 @@ export const searchUsers = async (req: Request, res: Response): Promise<void> =>
         ],
       },
       attributes: ["id", "username", "email"], // Only return the id, username, and email
+      include: [{
+        model: UserBoard,
+        attributes: ["userId", "boardId"]
+      }]
     });
 
     // If no users are found, return an empty array

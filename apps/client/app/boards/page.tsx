@@ -5,6 +5,7 @@ import axios from "axios";
 import { useAuth } from "../contexts/authContext";
 import { useRouter } from "next/navigation";
 import { FaUserPlus, FaTrashAlt } from "react-icons/fa";
+import { DeleteModal } from "../components/DeleteModal";
 
 interface Board {
   id: number;
@@ -27,6 +28,10 @@ interface User {
   id: number,
   username: string,
   email: string
+  UserBoards: {
+    userId: number;
+    boardId: number;
+  }[]
 }
 
 export default function BoardPage() {
@@ -36,6 +41,7 @@ export default function BoardPage() {
   const [newBoardName, setNewBoardName] = useState<string>("");
   const [newBoardDescription, setNewBoardDescription] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isDeleteConfirmationModalOpen, setIsDeleteConfirmationModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [userSuggestions, setUserSuggestions] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -114,14 +120,26 @@ export default function BoardPage() {
     }
   };
 
-  const handleDeleteBoard = async (e: React.MouseEvent, boardId: number) => {
+  const handleDeleteConfirmationModal = (e: React.MouseEvent, board: Board) => {
+    e.stopPropagation();
+    setSelectedBoard(board)
+    setIsDeleteConfirmationModalOpen(true)
+  }
+
+  const handleCancel = () => {
+    setSelectedBoard(null)
+    setIsDeleteConfirmationModalOpen(false)
+  }
+
+  const handleDeleteBoard = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/boards`,
-        { data: { boardId, userId: user.id } }
+        { data: { boardId: selectedBoard.id, userId: user.id } }
       );
-      setBoards((prevBoards) => prevBoards.filter((board) => board.id !== boardId));
+      setBoards((prevBoards) => prevBoards.filter((board) => board.id !== selectedBoard.id));
+      setIsDeleteConfirmationModalOpen(false)
       console.log("Board deleted successfully");
     } catch (error) {
       console.error("Error deleting board:", error);
@@ -131,7 +149,6 @@ export default function BoardPage() {
   const handleAddUserToBoard = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!selectedUser) return;
-console.log('selectedUser', JSON.stringify(selectedUser, null, 4))
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/userBoards`,
@@ -140,28 +157,9 @@ console.log('selectedUser', JSON.stringify(selectedUser, null, 4))
           username: selectedUser.username,
         }
       );
-      // Ensure the returned board structure matches the expected one
-      setBoards((prevBoards) =>
-        prevBoards.map((board) =>
-          board.id === selectedBoard.id
-            ? {
-              ...board,
-              UserBoards: [
-                ...board.UserBoards,
-                {
-                  id: response.data.userBoardId, // Ensure this matches the response structure
-                  userId: response.data.userId, // Ensure you have userId in the response
-                  boardId: selectedBoard.id,
-                  role: response.data.role, // Make sure the role comes from your API response
-                  createdAt: response.data.createdAt,
-                  updatedAt: response.data.updatedAt,
-                },
-              ],
-            }
-            : board
-        )
-      );
       console.log("User added successfully");
+      setSearchQuery("")
+      setSelectedUser(null)
       setIsModalOpen(false); // Close the modal after adding
     } catch (error) {
       console.error("Error adding user to board:", error);
@@ -239,32 +237,33 @@ console.log('selectedUser', JSON.stringify(selectedUser, null, 4))
                 <div
                   onClick={() => router.push(`/boards/${board.id}`)}
                   key={board.id}
-                  className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition break-words"
+                  className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition break-words flex flex-col justify-between h-full"
                 >
                   <h3 className="text-lg font-semibold mb-2">{board.name}</h3>
-                  {board.description && (
-                    <p className="text-sm text-gray-600">{board.description}</p>
-                  )}
-                  {
-                    board.ownerId === user?.id ? (
-                      <div className="flex items-center mt-4 space-x-2">
-                        <button
-                          onClick={(e) => handleOpenModal(e, board)}
-                          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
-                        >
-                          <FaUserPlus className="text-lg" />
-                        </button>
 
-                        <button
-                          onClick={(e) => handleDeleteBoard(e, board.id)}
-                          className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition"
-                        >
-                          <FaTrashAlt className="text-lg" />
-                        </button>
-                      </div>
-                    ) : null
-                  }
+                  <p className="text-sm text-gray-600 mb-12">{board?.description ?? "No Descriptions"}</p>
+
+
+                  {/* Always show icons at the bottom */}
+                  {board.ownerId === user?.id && (
+                    <div className="flex items-center mt-4 space-x-2 mt-auto">
+                      <button
+                        onClick={(e) => handleOpenModal(e, board)}
+                        className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+                      >
+                        <FaUserPlus className="text-lg" />
+                      </button>
+
+                      <button
+                        onClick={(e) => handleDeleteConfirmationModal(e, board)}
+                        className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition"
+                      >
+                        <FaTrashAlt className="text-lg" />
+                      </button>
+                    </div>
+                  )}
                 </div>
+
               ))}
             </div>
           ) : (
@@ -297,8 +296,8 @@ console.log('selectedUser', JSON.stringify(selectedUser, null, 4))
             />
             <ul className="max-h-60 overflow-y-auto">
               {userSuggestions.map((suggestionUser) => {
-                const isDisabled = selectedBoard.UserBoards.some(userBoard => userBoard.userId === suggestionUser.id)
-                const isSelected = suggestionUser.id === selectedUser?.id; 
+                const isDisabled = suggestionUser.UserBoards.some(userBoard => userBoard.boardId === selectedBoard.id)
+                const isSelected = suggestionUser.id === selectedUser?.id;
                 return <li key={suggestionUser.id} className="mb-2">
                   <button
                     disabled={isDisabled}
@@ -309,9 +308,9 @@ console.log('selectedUser', JSON.stringify(selectedUser, null, 4))
                     {isDisabled && (
                       <span className="text-xs text-gray-500 ml-2">(Already on board)</span>
                     )}
-                              {isSelected && (
-            <span className="ml-2 text-green-500">✔</span> // Add a checkmark when selected
-          )}
+                    {isSelected && (
+                      <span className="ml-2 text-green-500">✔</span> // Add a checkmark when selected
+                    )}
                   </button>
                 </li>
               })}
@@ -332,6 +331,11 @@ console.log('selectedUser', JSON.stringify(selectedUser, null, 4))
             </div>
           </div>
         </div>
+      )}
+
+            {/* Confirmation Modal */}
+            {isDeleteConfirmationModalOpen && (
+        <DeleteModal handleCancel={handleCancel} handleDelete={handleDeleteBoard} />
       )}
     </div>
   );
