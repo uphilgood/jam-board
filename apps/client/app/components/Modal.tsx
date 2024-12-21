@@ -1,0 +1,142 @@
+import axios from 'axios';
+import React, { useState } from 'react'
+import { useAuth } from '../contexts/authContext';
+import { useParams } from 'next/navigation';
+import { DeleteModal } from './DeleteModal';
+
+export const Modal = ({ selectedColumn, handleEdit, selectedTask, handleCloseModal, handleCreate, handleDelete }) => {
+    const { user } = useAuth();
+    const { boardId } = useParams();
+    const [title, setTitle] = useState(selectedTask?.title ?? "")
+    const [description, setDescription] = useState(selectedTask?.description ?? "")
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const isNew = selectedTask ? false : true
+    const handleUpdateWorkItem = async () => {
+        try {
+            const response = await axios.put(
+                `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
+                {
+                    ...selectedTask,
+                    workItemId: selectedTask.id,
+                    title,
+                    description
+                }
+            );
+            // Handle success (you can update the state with the response if needed)
+            console.log('WorkItem updated successfully:', response.data);
+            handleEdit({
+                ...selectedTask,
+                title, description
+            })
+        } catch (error) {
+            console.error("Error updating WorkItem status:", error);
+        }
+    }
+    const handleCreateWorkItem = async () => {
+        try {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
+                {
+                    title,
+                    description,
+                    status: selectedColumn,
+                    boardId,
+                    userId: user.id
+                }
+            );
+            // Handle success (you can update the state with the response if needed)
+            console.log('WorkItem created successfully:', response.data);
+            handleCreate(response.data.workItem)
+        } catch (error) {
+            console.error("Error updating WorkItem status:", error);
+        }
+    }
+
+    const handleOpenDeleteModal = () => {
+        setIsDeleteModalOpen(true)
+    }
+
+    const handleDeleteWorkItem = async () => {
+        try {
+            const response = await axios.delete(
+                `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
+                {
+                    data: { workItemId: selectedTask.id },
+                }
+            );
+            // Handle success (you can update the state with the response if needed)
+            console.log('WorkItem removed successfully:', response.data);
+            setIsDeleteModalOpen(false)
+            handleDelete(selectedTask.id)
+        } catch (error) {
+            console.error("Error updating WorkItem status:", error);
+        }
+    }
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg w-full max-w-md p-6 shadow-lg relative">
+                {/* Close Button */}
+                <button
+                    className="absolute top-3 right-3 text-gray-600 hover:text-gray-900"
+                    onClick={handleCloseModal}
+                >
+                    ×
+                </button>
+
+                {/* Modal Content */}
+                <h2 className="text-xl font-bold mb-4">{isNew ? "Add New Work Item" : "Edit Work Item"}</h2>
+                <div className="mb-6">
+                    <label htmlFor="title" className="block text-lg font-semibold text-gray-800 mb-2">
+                        Title
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out"
+                        placeholder="Enter title"
+                    />
+                </div>
+
+                <div className="mb-6">
+                    <label htmlFor="description" className="block text-lg font-semibold text-gray-800 mb-2">
+                        Description
+                    </label>
+                    <textarea
+                        id="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out"
+                        placeholder="Enter description"
+                        rows={5}
+                    />
+                </div>
+
+
+                {/* Save Button */}
+                {isNew ? <button
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md"
+                    onClick={handleCreateWorkItem}
+                >
+                    Create
+                </button> : <div className="flex justify-end items-center gap-2">
+                    <button
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md"
+                        onClick={handleUpdateWorkItem}
+                    >
+                        Save
+                    </button>
+                    <button
+                        className="p-2 text-red-500 hover:text-red-700"
+                        onClick={handleOpenDeleteModal}
+                        title="Delete"
+                    >
+                        Delete
+                    </button></div>}
+            </div>
+            {isDeleteModalOpen ? <DeleteModal handleCancel={() => setIsDeleteModalOpen(false)} handleDelete={handleDeleteWorkItem} /> : null}
+        </div>
+    )
+
+}
