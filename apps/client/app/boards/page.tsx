@@ -21,17 +21,17 @@ interface Board {
     role: string;
     createdAt: string;
     updatedAt: string;
-  }[]
+  }[];
 }
 
 interface User {
-  id: number,
-  username: string,
-  email: string
+  id: number;
+  username: string;
+  email: string;
   UserBoards: {
     userId: number;
     boardId: number;
-  }[]
+  }[];
 }
 
 export default function BoardPage() {
@@ -41,11 +41,12 @@ export default function BoardPage() {
   const [newBoardName, setNewBoardName] = useState<string>("");
   const [newBoardDescription, setNewBoardDescription] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isDeleteConfirmationModalOpen, setIsDeleteConfirmationModalOpen] = useState<boolean>(false);
+  const [isDeleteConfirmationModalOpen, setIsDeleteConfirmationModalOpen] =
+    useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [userSuggestions, setUserSuggestions] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedBoard, setSelectedBoard] = useState<Board>()
+  const [selectedBoard, setSelectedBoard] = useState<Board>();
 
   const router = useRouter();
 
@@ -93,9 +94,9 @@ export default function BoardPage() {
 
   const handleOpenModal = (e: React.MouseEvent, board) => {
     e.stopPropagation();
-    setIsModalOpen(true)
-    setSelectedBoard(board)
-  }
+    setIsModalOpen(true);
+    setSelectedBoard(board);
+  };
 
   const handleCreateBoard = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,24 +123,25 @@ export default function BoardPage() {
 
   const handleDeleteConfirmationModal = (e: React.MouseEvent, board: Board) => {
     e.stopPropagation();
-    setSelectedBoard(board)
-    setIsDeleteConfirmationModalOpen(true)
-  }
+    setSelectedBoard(board);
+    setIsDeleteConfirmationModalOpen(true);
+  };
 
   const handleCancel = () => {
-    setSelectedBoard(null)
-    setIsDeleteConfirmationModalOpen(false)
-  }
+    setSelectedBoard(null);
+    setIsDeleteConfirmationModalOpen(false);
+  };
 
   const handleDeleteBoard = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_URL}/boards`,
-        { data: { boardId: selectedBoard.id, userId: user.id } }
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/boards`, {
+        data: { boardId: selectedBoard.id, userId: user.id },
+      });
+      setBoards((prevBoards) =>
+        prevBoards.filter((board) => board.id !== selectedBoard.id)
       );
-      setBoards((prevBoards) => prevBoards.filter((board) => board.id !== selectedBoard.id));
-      setIsDeleteConfirmationModalOpen(false)
+      setIsDeleteConfirmationModalOpen(false);
       console.log("Board deleted successfully");
     } catch (error) {
       console.error("Error deleting board:", error);
@@ -158,8 +160,8 @@ export default function BoardPage() {
         }
       );
       console.log("User added successfully");
-      setSearchQuery("")
-      setSelectedUser(null)
+      setSearchQuery("");
+      setSelectedUser(null);
       setIsModalOpen(false); // Close the modal after adding
     } catch (error) {
       console.error("Error adding user to board:", error);
@@ -241,8 +243,9 @@ export default function BoardPage() {
                 >
                   <h3 className="text-lg font-semibold mb-2">{board.name}</h3>
 
-                  <p className="text-sm text-gray-600 mb-12">{board?.description ?? "No Descriptions"}</p>
-
+                  <p className="text-sm text-gray-600 mb-12">
+                    {board?.description ?? "No Descriptions"}
+                  </p>
 
                   {/* Always show icons at the bottom */}
                   {board.ownerId === user?.id && (
@@ -263,7 +266,6 @@ export default function BoardPage() {
                     </div>
                   )}
                 </div>
-
               ))}
             </div>
           ) : (
@@ -296,23 +298,33 @@ export default function BoardPage() {
             />
             <ul className="max-h-60 overflow-y-auto">
               {userSuggestions.map((suggestionUser) => {
-                const isDisabled = suggestionUser.UserBoards.some(userBoard => userBoard.boardId === selectedBoard.id)
+                const isDisabled = suggestionUser.UserBoards.some(
+                  (userBoard) => userBoard.boardId === selectedBoard.id
+                );
                 const isSelected = suggestionUser.id === selectedUser?.id;
-                return <li key={suggestionUser.id} className="mb-2">
-                  <button
-                    disabled={isDisabled}
-                    onClick={() => setSelectedUser(suggestionUser)} // Disable click if isDisabled is true
-                    className={`w-full text-left p-2 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
-                  >
-                    {suggestionUser.email}
-                    {isDisabled && (
-                      <span className="text-xs text-gray-500 ml-2">(Already on board)</span>
-                    )}
-                    {isSelected && (
-                      <span className="ml-2 text-green-500">✔</span> // Add a checkmark when selected
-                    )}
-                  </button>
-                </li>
+                return (
+                  <li key={suggestionUser.id} className="mb-2">
+                    <button
+                      disabled={isDisabled}
+                      onClick={() => setSelectedUser(suggestionUser)} // Disable click if isDisabled is true
+                      className={`w-full text-left p-2 ${
+                        isDisabled
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-gray-200"
+                      }`}
+                    >
+                      {suggestionUser.email}
+                      {isDisabled && (
+                        <span className="text-xs text-gray-500 ml-2">
+                          (Already on board)
+                        </span>
+                      )}
+                      {isSelected && (
+                        <span className="ml-2 text-green-500">✔</span> // Add a checkmark when selected
+                      )}
+                    </button>
+                  </li>
+                );
               })}
             </ul>
             <div className="mt-4">
@@ -333,9 +345,12 @@ export default function BoardPage() {
         </div>
       )}
 
-            {/* Confirmation Modal */}
-            {isDeleteConfirmationModalOpen && (
-        <DeleteModal handleCancel={handleCancel} handleDelete={handleDeleteBoard} />
+      {/* Confirmation Modal */}
+      {isDeleteConfirmationModalOpen && (
+        <DeleteModal
+          handleCancel={handleCancel}
+          handleDelete={handleDeleteBoard}
+        />
       )}
     </div>
   );

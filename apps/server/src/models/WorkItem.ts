@@ -3,7 +3,9 @@ import sequelize from "../config/db";
 import Board from "./Board";
 import User from "./User";
 
-class WorkItem extends Model {}
+class WorkItem extends Model {
+  boardId: any;
+}
 
 WorkItem.init(
   {

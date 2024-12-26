@@ -16,12 +16,17 @@ export const getBoards: RequestHandler = async (
   }
 
   try {
+    // join UserBoard to get all boards that the user has access to and return board info
+    // and the role of the user in the board
+
     const boards = await Board.findAll({
       include: {
         model: UserBoard,
         where: { userId: userId },
       },
     });
+
+    console.log("boards: ", boards);
 
     res.status(200).json({ boards });
   } catch (error) {
@@ -69,12 +74,31 @@ export const createBoard: RequestHandler = async (
   }
 };
 
-/**
- * Delete a board and remove all related entries in the UserBoard table
- * @route DELETE /boards
- * @param {Request} req - The request object
- * @param {Response} res - The response object
- */
+export const updateBoard: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { boardId, name, description } = req.body;
+
+  try {
+    const board = await Board.findByPk(boardId);
+
+    if (!board) {
+      return res.status(404).json({ message: "Board not found" });
+    }
+
+    // Update the board
+    board.name = name || board.name;
+    board.description = description || board.description;
+    await board.save();
+
+    res.status(200).json({ message: "Board updated successfully", board });
+  } catch (error) {
+    console.error("Error updating board:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const deleteBoard: RequestHandler = async (
   req: Request,
   res: Response
