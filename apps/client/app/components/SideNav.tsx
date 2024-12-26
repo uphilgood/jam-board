@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/authContext";
 
 export default function SideNav() {
   const { user, logout } = useAuth(); // Access the user and logout function
+
   const [showDropdown, setShowDropdown] = useState(false);
 
   return !user ? null : (

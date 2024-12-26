@@ -8,6 +8,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value; // Get token from cookies
 
   if (!token) {
+    console.error("No token found");
     // If no token is found, redirect to the login page
     return NextResponse.redirect(new URL("/login", request.url));
   }
