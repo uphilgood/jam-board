@@ -1,5 +1,5 @@
 import { Request, RequestHandler, Response } from "express";
-import { WorkItem } from "../models";
+import { UserBoard, WorkItem } from "../models";
 
 export const getWorkItems: RequestHandler = async (
   req: Request,
@@ -41,7 +41,7 @@ export const getWorkItemsByBoardId: RequestHandler = async (
   }
 
   try {
-    const workItems = await WorkItem.findAll({where: { boardId: boardId }});
+    const workItems = await WorkItem.findAll({ where: { boardId: boardId } });
 
     res.status(200).json({ workItems });
   } catch (error) {
@@ -125,25 +125,40 @@ export const deleteWorkItem: RequestHandler = async (
   res: Response
 ): Promise<any> => {
   try {
-    const { workItemId } = req.body;
+    const { workItemId, userId } = req.body;
 
     // Validate the input
-    if (!workItemId) {
+    if (!workItemId || !userId) {
       return res
         .status(400)
-        .json({ message: "workItem ID are required" });
+        .json({ message: "workItem ID  and User ID is required" });
     }
 
-    // Delete the work item from the database
+    // check to see if user is authorized to delete the workItem
+    const workItem = await WorkItem.findByPk(workItemId);
+    if (!workItem) {
+      return res.status(404).json({ message: "Work item not found" });
+    }
+
+    const boardId = workItem.boardId;
+    const userHasAccess = await UserBoard.findOne({
+      where: { userId, boardId },
+    });
+    if (!userHasAccess) {
+      return res
+        .status(401)
+        .json({ message: "User not authorized to delete work item" });
+    }
+
     const deletedWorkItem = await WorkItem.destroy({
       where: { id: workItemId },
     });
 
     res
-      .status(200)
-      .json({ message: "Work item removed successfully", deletedWorkItem });
+      .status(201)
+      .json({ message: "Work item deleted successfully", deletedWorkItem });
   } catch (error) {
-    console.error("Error updating workItem:", error);
+    console.error("Error deleting workItem:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
