@@ -1,0 +1,539 @@
+openapi: 3.0.3
+info:
+  title: Board Management API
+  description: API for managing boards, including creating, updating, fetching, deleting boards, and user authentication.
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+    description: Local server
+tags:
+  - name: Auth
+    description: API for user authentication and registration.
+  - name: Boards
+    description: API for managing boards and user access to boards.
+
+paths:
+  /register:
+    post:
+      tags:
+        - Auth
+      summary: Registers a new user
+      description: Registers a new user by creating an account with a username, password, and email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The username of the new user.
+                password:
+                  type: string
+                  description: The password of the new user.
+                email:
+                  type: string
+                  description: The email of the new user.
+              required:
+                - username
+                - password
+                - email
+      responses:
+        201:
+          description: User registered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      email:
+                        type: string
+        400:
+          description: Username already in use.
+        500:
+          description: Server error.
+
+  /login:
+    post:
+      tags:
+        - Auth
+      summary: Log in a user and return a JWT token
+      description: Log in an existing user, verify credentials, and return a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The username of the user.
+                password:
+                  type: string
+                  description: The password of the user.
+              required:
+                - username
+                - password
+      responses:
+        200:
+          description: Login successful. Returns a JWT token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      email:
+                        type: string
+        401:
+          description: Invalid username or password.
+        500:
+          description: Server error.
+
+  /logout:
+    post:
+      tags:
+        - Auth
+      summary: Log out the user
+      description: Log out the user by clearing the JWT token from the cookie.
+      responses:
+        200:
+          description: Logout successful.
+        500:
+          description: Server error.
+
+  /boards:
+    get:
+      tags:
+        - Boards
+      summary: Get all boards that a user has access to
+      description: Retrieve all boards a specific user can access, including their role in each board.
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user.
+      responses:
+        200:
+          description: Successfully retrieved boards.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  boards:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        role:
+                          type: string
+        400:
+          description: User ID is required.
+        500:
+          description: Server error.
+
+    post:
+      tags:
+        - Boards
+      summary: Create a new board and associate it with the creator in the UserBoard table
+      description: Create a new board and add the creator as the owner in the UserBoard table.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  description: The ID of the user creating the board.
+                name:
+                  type: string
+                  description: The name of the board.
+                description:
+                  type: string
+                  description: A brief description of the board.
+              required:
+                - userId
+                - name
+      responses:
+        201:
+          description: Board created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  board:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      ownerId:
+                        type: integer
+        400:
+          description: Invalid input, userId and name are required.
+        500:
+          description: Server error.
+
+    put:
+      tags:
+        - Boards
+      summary: Update an existing board
+      description: Update the name and/or description of a specific board.
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                boardId:
+                  type: integer
+                  description: The ID of the board to update
+                name:
+                  type: string
+                  description: The new name for the board.
+                description:
+                  type: string
+                  description: The new description for the board.
+      responses:
+        200:
+          description: Board updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  board:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      description:
+                        type: string
+        400:
+          description: Invalid input.
+        404:
+          description: Board not found.
+        500:
+          description: Server error.
+
+    delete:
+      tags:
+        - Boards
+      summary: Delete a board
+      description: Delete a specific board and its related UserBoard entries if the requesting user is the board's owner.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  description: The ID of the user requesting the deletion.
+                boardId:
+                  type: integer
+                  description: The ID of the board to delete.
+      responses:
+        200:
+          description: Board deleted successfully.
+        400:
+          description: Invalid input, userId and boardId are required.
+        403:
+          description: User does not have permission to delete this board.
+        404:
+          description: Board not found.
+        500:
+          description: Server error.
+
+  /work-items:
+    get:
+      tags:
+        - WorkItems
+      summary: Get all work items for a user
+      description: Retrieve all work items for a specific user.
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user to fetch work items for.
+      responses:
+        200:
+          description: Successfully retrieved work items.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workItems:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorkItem'
+        400:
+          description: User ID is required.
+        500:
+          description: Server error.
+
+    post:
+      tags:
+        - WorkItems
+      summary: Create a new work item
+      description: Create a new work item and associate it with a board.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                boardId:
+                  type: integer
+                  description: The ID of the board to associate the work item with.
+                userId:
+                  type: integer
+                  description: The ID of the user creating the work item.
+                title:
+                  type: string
+                  description: The title of the work item.
+                description:
+                  type: string
+                  description: The description of the work item.
+                status:
+                  type: string
+                  description: The status of the work item.
+                assignedTo:
+                  type: integer
+                  description: The ID of the user to whom the work item is assigned.
+              required:
+                - boardId
+                - userId
+                - title
+      responses:
+        201:
+          description: Work item created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  workItem:
+                    $ref: '#/components/schemas/WorkItem'
+        400:
+          description: Invalid input, boardId and userId are required.
+        500:
+          description: Server error.
+    
+    put:
+      tags:
+        - WorkItems
+      summary: Update an existing work item
+      description: Update details of an existing work item.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workItemId:
+                  type: integer
+                  description: The ID of the work item to update.
+                title:
+                  type: string
+                  description: The new title of the work item.
+                description:
+                  type: string
+                  description: The new description of the work item.
+                status:
+                  type: string
+                  description: The new status of the work item.
+                assignedTo:
+                  type: integer
+                  description: The ID of the new assignee.
+              required:
+                - workItemId
+      responses:
+        200:
+          description: Work item updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  workItem:
+                    $ref: '#/components/schemas/WorkItem'
+        400:
+          description: Invalid input, workItem ID is required.
+        404:
+          description: Work item not found.
+        500:
+          description: Server error.
+
+    delete:
+      tags:
+        - WorkItems
+      summary: Delete a work item
+      description: Delete a specific work item if the requesting user is authorized.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workItemId:
+                  type: integer
+                  description: The ID of the work item to delete.
+                userId:
+                  type: integer
+                  description: The ID of the user requesting the deletion.
+              required:
+                - workItemId
+                - userId
+      responses:
+        200:
+          description: Work item deleted successfully.
+        400:
+          description: Invalid input, workItem ID and user ID are required.
+        401:
+          description: User not authorized to delete this work item.
+        404:
+          description: Work item not found.
+        500:
+          description: Server error.
+  /work-items/items:
+    get:
+      tags:
+        - WorkItems
+      summary: Get work items for a specific board
+      description: Retrieve all work items associated with a specific board.
+      parameters:
+        - in: query
+          name: boardId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the board to fetch work items for.
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user fetching the work items.
+      responses:
+        200:
+          description: Successfully retrieved work items.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workItems:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorkItem'
+        400:
+          description: User ID and Board ID are required.
+        500:
+          description: Server error.
+
+components:
+  schemas:
+    WorkItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        assignedTo:
+          type: integer
+        createdBy:
+          type: integer
+        boardId:
+          type: integer
+    Board:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        ownerId:
+          type: integer
+    UserBoard:
+      type: object
+      properties:
+        userId:
+          type: integer
+        boardId:
+          type: integer
+        role:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
