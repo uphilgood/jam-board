@@ -8,22 +8,22 @@ import { useAuth } from "../../contexts/authContext";
 import { Modal } from "../../components/Modal";
 
 interface Task {
-  id: number,
-  title: string,
-  description: string,
-  status: WorkItemStatusEnum,
-  boardId: number,
-  createdBy: number,
-  assignedTo: number,
-  createdAt: string,
-  updatedAt: string
+  id: number;
+  title: string;
+  description: string;
+  status: WorkItemStatusEnum;
+  boardId: number;
+  createdBy: number;
+  assignedTo: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 enum WorkItemStatusEnum {
-  TODO = "TODO",
-  IN_PROGRESS = "IN_PROGRESS",
-  QA = "QA",
-  DONE = "DONE",
+  TODO = "todo",
+  IN_PROGRESS = "in_progress",
+  QA = "in_qa",
+  DONE = "done",
 }
 
 interface Column {
@@ -58,7 +58,7 @@ const initialColumns = [
     title: "Done",
     tasks: [],
   },
-]
+];
 
 const JiraBoard: React.FC = () => {
   const { user } = useAuth();
@@ -66,41 +66,49 @@ const JiraBoard: React.FC = () => {
   const { boardId } = useParams();
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task>()
+  const [selectedTask, setSelectedTask] = useState<Task>();
   const [selectedColumn, setSelectedColumn] = useState<WorkItemStatusEnum>();
+
   useEffect(() => {
-    if (!user) {
-      return router.push("/login");
+    if (user?.id) {
+      const fetchBoards = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/workItems/items?userId=${user.id}&boardId=${boardId}`
+          );
+          const newColumns = columns.map((column) => {
+            return {
+              ...column,
+              tasks: response.data.workItems.filter(
+                (item) => item.status === column.status
+              ),
+            };
+          });
+          setColumns(newColumns);
+          // setWorkItems(response.data.workItems); // Set the work items to state
+        } catch (error) {
+          console.error("Error fetching boards:", error);
+        }
+      };
+      fetchBoards();
     }
-    const fetchBoards = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/workItems/items?userId=${user.id}&boardId=${boardId}`
-        );
-        const newColumns = columns.map((column) => {
-          return {
-            ...column,
-            tasks: response.data.workItems.filter((item) => item.status === column.status),
-          };
-        });
-        setColumns(newColumns)
-        // setWorkItems(response.data.workItems); // Set the work items to state
-      } catch (error) {
-        console.error("Error fetching boards:", error);
-      }
-    };
-    fetchBoards();
   }, [user, boardId, router]);
 
-  const handleOpenModal = ({task, status}: {task?: Task, status?: WorkItemStatusEnum}) => {
-    setSelectedColumn(status)
-    setSelectedTask(task)
+  const handleOpenModal = ({
+    task,
+    status,
+  }: {
+    task?: Task;
+    status?: WorkItemStatusEnum;
+  }) => {
+    setSelectedColumn(status);
+    setSelectedTask(task);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedTask(null)
+    setSelectedTask(null);
   };
 
   const handleEdit = (updatedWorkItem) => {
@@ -108,11 +116,13 @@ const JiraBoard: React.FC = () => {
       prevColumns.map((column) => ({
         ...column,
         tasks: column.tasks.map((task) =>
-          task.id === updatedWorkItem.id ? { ...task, ...updatedWorkItem } : task
+          task.id === updatedWorkItem.id
+            ? { ...task, ...updatedWorkItem }
+            : task
         ),
       }))
     );
-    handleCloseModal()
+    handleCloseModal();
   };
 
   const handleCreate = (newWorkItem) => {
@@ -128,8 +138,8 @@ const JiraBoard: React.FC = () => {
         return column; // No changes for other columns
       })
     );
-    handleCloseModal()
-  }
+    handleCloseModal();
+  };
 
   const handleDelete = (workItemId) => {
     setColumns((prevColumns) =>
@@ -138,42 +148,46 @@ const JiraBoard: React.FC = () => {
         tasks: column.tasks.filter((task) => task.id !== workItemId),
       }))
     );
-    handleCloseModal()
-  }
+    handleCloseModal();
+  };
 
   const onDragEnd = async (result: any) => {
     const { source, destination } = result;
-  
+
     // If dropped outside the list
     if (!destination) return;
-  
-    const sourceColIndex = columns.findIndex((col) => col.id === source.droppableId);
-    const destColIndex = columns.findIndex((col) => col.id === destination.droppableId);
-  
+
+    const sourceColIndex = columns.findIndex(
+      (col) => col.id === source.droppableId
+    );
+    const destColIndex = columns.findIndex(
+      (col) => col.id === destination.droppableId
+    );
+
     const sourceCol = columns[sourceColIndex];
     const destCol = columns[destColIndex];
-  
+
     const sourceTasks = Array.from(sourceCol.tasks);
-  
+
     if (sourceColIndex === destColIndex) {
       // Same column reordering
       const [removedTask] = sourceTasks.splice(source.index, 1);
       sourceTasks.splice(destination.index, 0, removedTask);
-  
+
       const updatedColumns = [...columns];
       updatedColumns[sourceColIndex] = { ...sourceCol, tasks: sourceTasks };
       setColumns(updatedColumns);
       return;
     }
-  
+
     // Cross-column dragging
     const destTasks = Array.from(destCol.tasks);
-  
+
     // Remove the dragged task from source
     const [removedTask] = sourceTasks.splice(source.index, 1);
     // Add the task to the new destination
     destTasks.splice(destination.index, 0, removedTask);
-  
+
     // Ensure removedTask has a status property
     if (removedTask && removedTask.status !== undefined) {
       // Update the status of the task based on the new column
@@ -182,13 +196,13 @@ const JiraBoard: React.FC = () => {
       console.error("Removed task does not have a valid status:", removedTask);
       return; // If no status, exit early to avoid errors
     }
-  
+
     // Optimistically update the state
     const newColumns = [...columns];
     newColumns[sourceColIndex] = { ...sourceCol, tasks: sourceTasks };
     newColumns[destColIndex] = { ...destCol, tasks: destTasks };
     setColumns(newColumns);
-  
+
     // Now make the API call to update the status of the workItem
     try {
       const response = await axios.put(
@@ -202,7 +216,7 @@ const JiraBoard: React.FC = () => {
       console.log("WorkItem status updated successfully:", response.data);
     } catch (error) {
       console.error("Error updating WorkItem status:", error);
-  
+
       // If API call fails, revert the status change (optimistic update rollback)
       removedTask.status = sourceCol.status;
       const rollbackColumns = [...columns];
@@ -211,7 +225,6 @@ const JiraBoard: React.FC = () => {
       setColumns(rollbackColumns);
     }
   };
-  
 
   return (
     <div className="flex items-start gap-4 p-5 bg-gray-100 min-h-screen">
@@ -229,17 +242,25 @@ const JiraBoard: React.FC = () => {
                   {...provided.droppableProps}
                 >
                   {column.tasks.map((task, index) => (
-                    <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                    <Draggable
+                      key={task.id}
+                      draggableId={task.id.toString()}
+                      index={index}
+                    >
                       {(provided) => (
                         <div
-                          onClick={() => handleOpenModal({task})}
+                          onClick={() => handleOpenModal({ task })}
                           className="bg-gray-50 hover:bg-gray-100 border rounded-lg p-3 mb-3 shadow-sm"
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                         >
-                          <h1 className="text-lg font-semibold text-gray-800">{task.title}</h1>
-                          <p className="text-sm text-gray-600 mt-2">{task.description}</p>
+                          <h1 className="text-lg font-semibold text-gray-800">
+                            {task.title}
+                          </h1>
+                          <p className="text-sm text-gray-600 mt-2">
+                            {task.description}
+                          </p>
                         </div>
                       )}
                     </Draggable>
@@ -247,7 +268,7 @@ const JiraBoard: React.FC = () => {
                   {provided.placeholder}
 
                   <div
-                    onClick={() => handleOpenModal({status: column.status})}
+                    onClick={() => handleOpenModal({ status: column.status })}
                     className="bg-gray-50 hover:bg-gray-100 border border-dashed border-gray-300 rounded-md p-2 mb-2 flex items-center justify-center cursor-pointer transition-all"
                   >
                     <svg
@@ -258,9 +279,15 @@ const JiraBoard: React.FC = () => {
                       stroke="currentColor"
                       strokeWidth={2}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
                     </svg>
-                    <span className="ml-2 text-sm text-gray-500">Add Work Item</span>
+                    <span className="ml-2 text-sm text-gray-500">
+                      Add Work Item
+                    </span>
                   </div>
                   {/* {provided.placeholder} */}
                 </div>
@@ -269,7 +296,16 @@ const JiraBoard: React.FC = () => {
           </div>
         ))}
       </DragDropContext>
-      {isModalOpen ? <Modal selectedColumn={selectedColumn} handleEdit={handleEdit} selectedTask={selectedTask} handleCloseModal={handleCloseModal} handleCreate={handleCreate} handleDelete={handleDelete} /> : null}
+      {isModalOpen ? (
+        <Modal
+          selectedColumn={selectedColumn}
+          handleEdit={handleEdit}
+          selectedTask={selectedTask}
+          handleCloseModal={handleCloseModal}
+          handleCreate={handleCreate}
+          handleDelete={handleDelete}
+        />
+      ) : null}
     </div>
   );
 };

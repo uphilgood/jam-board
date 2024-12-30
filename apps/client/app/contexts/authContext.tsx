@@ -31,7 +31,9 @@ export const AuthProvider = ({ children }) => {
 
     if (storedToken && storedUser) {
       setToken(storedToken);
-      setUser(JSON.parse(storedUser)); // Assuming user info is stored as JSON
+      setUser({ ...JSON.parse(storedUser) }); // Assuming user info is stored as JSON
+    } else {
+      router.push("/login");
     }
   }, []);
 

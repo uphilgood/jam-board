@@ -98,18 +98,17 @@ export const updateWorkItem: RequestHandler = async (
         .json({ message: "workItem ID and boardId are required" });
     }
 
-    // Create the new board
-    const workItem = await WorkItem.update(
-      {
-        ...(description && { description }),
-        ...(title && { title }),
-        ...(status && { status }),
-        ...(assignedTo && { assignedTo }),
-      },
-      {
-        where: { id: workItemId },
-      }
-    );
+    const workItem = await WorkItem.findByPk(workItemId);
+    if (!workItem) {
+      return res.status(404).json({ message: "Work item not found" });
+    }
+
+    workItem.update({
+      ...(description && { description }),
+      ...(title && { title }),
+      ...(status && { status }),
+      ...(assignedTo && { assignedTo }),
+    });
 
     res
       .status(201)
