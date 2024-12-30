@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/authContext";
 import { useRouter } from "next/navigation";
 import { FaUserPlus, FaTrashAlt } from "react-icons/fa";
 import { DeleteModal } from "../components/DeleteModal";
+import { User, UserSearchInput } from "../components/UserSearchInput";
 
 interface Board {
   id: number;
@@ -24,16 +25,6 @@ interface Board {
   }[];
 }
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  UserBoards: {
-    userId: number;
-    boardId: number;
-  }[];
-}
-
 export default function BoardPage() {
   const { user } = useAuth();
   const [boards, setBoards] = useState<Board[]>([]);
@@ -43,54 +34,28 @@ export default function BoardPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleteConfirmationModalOpen, setIsDeleteConfirmationModalOpen] =
     useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [userSuggestions, setUserSuggestions] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedBoard, setSelectedBoard] = useState<Board>();
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
-      return router.push("/login");
+    if (user?.id) {
+      // Fetch boards for the user
+      const fetchBoards = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/boards?userId=${user.id}`
+          );
+          setBoards(response.data.boards);
+        } catch (error) {
+          console.error("Error fetching boards:", error);
+        }
+      };
+
+      fetchBoards();
     }
-
-    // Fetch boards for the user
-    const fetchBoards = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/boards?userId=${user.id}`
-        );
-        setBoards(response.data.boards);
-      } catch (error) {
-        console.error("Error fetching boards:", error);
-      }
-    };
-
-    fetchBoards();
   }, [user]);
-
-  // Search users for autocomplete
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setUserSuggestions([]);
-      return;
-    }
-
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/search`, // Adjust the API URL
-          { params: { searchQuery } } // Send searchQuery as a query parameter
-        );
-        setUserSuggestions(response.data.users);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
-    fetchUsers();
-  }, [searchQuery]);
 
   const handleOpenModal = (e: React.MouseEvent, board) => {
     e.stopPropagation();
@@ -148,21 +113,14 @@ export default function BoardPage() {
     }
   };
 
-  const handleAddUserToBoard = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!selectedUser) return;
+  const handleAddUserToBoard = async (selectedUser: User) => {
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/userBoards`,
-        {
-          boardId: selectedBoard.id,
-          username: selectedUser.username,
-        }
-      );
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/userBoards`, {
+        boardId: selectedBoard.id,
+        username: selectedUser.username,
+      });
       console.log("User added successfully");
-      setSearchQuery("");
-      setSelectedUser(null);
-      setIsModalOpen(false); // Close the modal after adding
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error adding user to board:", error);
     }
@@ -289,47 +247,16 @@ export default function BoardPage() {
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-20">
           <div className="bg-white p-6 rounded shadow-lg w-96">
             <h3 className="text-lg font-semibold mb-4">Add User to Board</h3>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for users..."
-              className="w-full p-2 border border-gray-300 rounded mb-4"
+            <UserSearchInput
+              selectedBoard={selectedBoard}
+              onSelectUser={setSelectedUser}
             />
-            <ul className="max-h-60 overflow-y-auto">
-              {userSuggestions.map((suggestionUser) => {
-                const isDisabled = suggestionUser.UserBoards.some(
-                  (userBoard) => userBoard.boardId === selectedBoard.id
-                );
-                const isSelected = suggestionUser.id === selectedUser?.id;
-                return (
-                  <li key={suggestionUser.id} className="mb-2">
-                    <button
-                      disabled={isDisabled}
-                      onClick={() => setSelectedUser(suggestionUser)} // Disable click if isDisabled is true
-                      className={`w-full text-left p-2 ${
-                        isDisabled
-                          ? "opacity-50 cursor-not-allowed"
-                          : "hover:bg-gray-200"
-                      }`}
-                    >
-                      {suggestionUser.email}
-                      {isDisabled && (
-                        <span className="text-xs text-gray-500 ml-2">
-                          (Already on board)
-                        </span>
-                      )}
-                      {isSelected && (
-                        <span className="ml-2 text-green-500">✔</span> // Add a checkmark when selected
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
             <div className="mt-4">
               <button
-                onClick={(e) => handleAddUserToBoard(e)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddUserToBoard(selectedUser);
+                }}
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
               >
                 Add User

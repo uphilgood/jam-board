@@ -8,7 +8,10 @@ import { UserBoard } from "../models";
  * @param req - Express request object containing the search query
  * @param res - Express response object to send the results
  */
-export const searchUsers = async (req: Request, res: Response): Promise<void> => {
+export const searchUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { searchQuery } = req.query;
   // If no search query is provided or it's not a string, return an error
   if (!searchQuery || typeof searchQuery !== "string") {
@@ -34,10 +37,12 @@ export const searchUsers = async (req: Request, res: Response): Promise<void> =>
         ],
       },
       attributes: ["id", "username", "email"], // Only return the id, username, and email
-      include: [{
-        model: UserBoard,
-        attributes: ["userId", "boardId"]
-      }]
+      include: [
+        {
+          model: UserBoard,
+          attributes: ["userId", "boardId"],
+        },
+      ],
     });
 
     // If no users are found, return an empty array
@@ -50,6 +55,31 @@ export const searchUsers = async (req: Request, res: Response): Promise<void> =>
     res.status(200).json({ users });
   } catch (error) {
     console.error("Error searching users:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const getUser = async (req: Request, res: Response): Promise<void> => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    res.status(400).json({ message: "User ID is required." });
+    return;
+  }
+
+  try {
+    const user = await User.findByPk(userId, {
+      attributes: ["id", "username", "email"],
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found." });
+      return;
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error fetching user:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };

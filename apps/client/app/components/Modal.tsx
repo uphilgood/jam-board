@@ -1,8 +1,9 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/authContext";
 import { useParams } from "next/navigation";
 import { DeleteModal } from "./DeleteModal";
+import { User, UserSearchInput } from "./UserSearchInput";
 
 export const Modal = ({
   selectedColumn,
@@ -18,8 +19,31 @@ export const Modal = ({
   const [description, setDescription] = useState(
     selectedTask?.description ?? ""
   );
+  const [assignedTo, setAssignedTo] = useState(
+    selectedTask?.assignedTo ?? null
+  );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [assignedUsername, setAssignedUsername] = useState("");
   const isNew = selectedTask ? false : true;
+
+  const fetchUser = async (user) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${user}`
+      );
+      setAssignedUsername(response.data.user.username);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("assignedTo in modal", assignedTo);
+    if (assignedTo) {
+      fetchUser(assignedTo);
+    }
+  }, [assignedTo]);
+
   const handleUpdateWorkItem = async () => {
     try {
       const response = await axios.put(
@@ -29,6 +53,7 @@ export const Modal = ({
           workItemId: selectedTask.id,
           title,
           description,
+          assignedTo,
         }
       );
       // Handle success (you can update the state with the response if needed)
@@ -37,6 +62,7 @@ export const Modal = ({
         ...selectedTask,
         title,
         description,
+        assignedTo,
       });
     } catch (error) {
       console.error("Error updating WorkItem status:", error);
@@ -52,6 +78,7 @@ export const Modal = ({
           status: selectedColumn,
           boardId,
           userId: user.id,
+          assignedTo: assignedTo,
         }
       );
       // Handle success (you can update the state with the response if needed)
@@ -128,6 +155,25 @@ export const Modal = ({
             className="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out"
             placeholder="Enter description"
             rows={5}
+          />
+        </div>
+
+        <div className="mb-6">
+          <label
+            htmlFor="assignedTo"
+            className="block text-lg font-semibold text-gray-800 mb-2"
+          >
+            Assigned to
+          </label>
+          <div className="flex items-center mb-2">
+            <span>{assignedUsername || "Not assigned"}</span>
+          </div>
+          <UserSearchInput
+            selectedBoard={{ id: boardId }}
+            onSelectUser={(user: User) => {
+              setAssignedUsername(user.username);
+              setAssignedTo(user.id);
+            }}
           />
         </div>
 
