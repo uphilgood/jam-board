@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useState, useEffect, useContext } from "react";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 // Type definitions for the user and context
 interface User {
@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Retrieve the token and user from cookies
@@ -33,7 +34,10 @@ export const AuthProvider = ({ children }) => {
       setToken(storedToken);
       setUser({ ...JSON.parse(storedUser) }); // Assuming user info is stored as JSON
     } else {
-      router.push("/login");
+      // check that we are not on the register page
+      if (pathname !== "/register") {
+        router.push("/login");
+      }
     }
   }, []);
 
