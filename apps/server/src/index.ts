@@ -3,18 +3,17 @@ import * as dotenv from "dotenv";
 import sequelize from "./config/db";
 import { setupAssociations } from "./models";
 import cors from "cors";
-import swaggerUi from "swagger-ui-express";
-import YAML from "yamljs";
+// import swaggerUi from "swagger-ui-express";
+// import YAML from "yamljs";
 
 import authRoutes from "./routes/authRoutes";
 import boardRoutes from "./routes/boardRoutes";
 import userBoardRoutes from "./routes/userBoardRoutes";
 import workItemRoutes from "./routes/workItemRoutes";
 import userRoutes from "./routes/userRoutes";
-import path from 'path';
+// import path from 'path';
 
-
-const swaggerDocument = YAML.load(path.join(__dirname, '../specs/swagger.yaml'));
+// const swaggerDocument = YAML.load(path.join(__dirname, '../specs/swagger.yaml'));
 
 dotenv.config(); // Load environment variables
 
@@ -25,7 +24,7 @@ app.use(express.json()); // Parse JSON request bodies
 setupAssociations(); // Setup model associations
 const port = process.env.PORT || 4000;
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Register auth routes
 app.use("/auth", authRoutes); // Routes for /auth/register and /auth/login
 // Use board routes
