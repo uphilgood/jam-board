@@ -36,7 +36,7 @@ app.use("/workItems", workItemRoutes);
 app.use("/users", userRoutes);
 
 // use getBoards
-app.use("/", boardRoutes);
+// app.use("/", boardRoutes);
 
 const startServer = async () => {
   try {
