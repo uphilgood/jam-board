@@ -24,16 +24,34 @@ app.use(express.json()); // Parse JSON request bodies
 setupAssociations(); // Setup model associations
 const port = process.env.PORT || 4000;
 
-// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-// Register auth routes
-app.use("/auth", authRoutes); // Routes for /auth/register and /auth/login
-// Use board routes
+// Debugging: Log incoming requests
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// Register routes with logging
+console.log("Registering routes...");
+app.use("/auth", authRoutes);
+console.log("/auth registered");
+
 app.use("/boards", boardRoutes);
+console.log("/boards registered");
 
 app.use("/userBoards", userBoardRoutes);
+console.log("/userBoards registered");
+
 app.use("/workItems", workItemRoutes);
-// Use user routes
+console.log("/workItems registered");
+
 app.use("/users", userRoutes);
+console.log("/users registered");
+
+// Fallback middleware for unhandled routes
+app.use((req, res) => {
+  console.error(`Unhandled route: ${req.method} ${req.originalUrl}`);
+  res.status(404).send({ error: "Route not found" });
+});
 
 // use getBoards
 // app.use("/", boardRoutes);
