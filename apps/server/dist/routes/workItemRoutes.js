@@ -34,12 +34,11 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = __importStar(require("express"));
-const boardController_1 = require("../controllers/boardController");
+const workItemController_1 = require("../controllers/workItemController");
 const router = express.Router();
-// Route to get all boards for a user
-router.get("/", boardController_1.getBoards);
-// Route to create a new board
-router.post("/", boardController_1.createBoard);
-// Route to delete a new board
-router.delete("/", boardController_1.deleteBoard);
+router.get("/", workItemController_1.getWorkItems);
+router.get("/items", workItemController_1.getWorkItemsByBoardId);
+router.post("/", workItemController_1.createWorkItem);
+router.put("/", workItemController_1.updateWorkItem);
+router.delete("/", workItemController_1.deleteWorkItem);
 exports.default = router;

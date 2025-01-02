@@ -41,25 +41,50 @@ const dotenv = __importStar(require("dotenv"));
 const db_1 = __importDefault(require("./config/db"));
 const models_1 = require("./models");
 const cors_1 = __importDefault(require("cors"));
+// import swaggerUi from "swagger-ui-express";
+// import YAML from "yamljs";
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const boardRoutes_1 = __importDefault(require("./routes/boardRoutes"));
+const userBoardRoutes_1 = __importDefault(require("./routes/userBoardRoutes"));
+const workItemRoutes_1 = __importDefault(require("./routes/workItemRoutes"));
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+// import path from 'path';
+// const swaggerDocument = YAML.load(path.join(__dirname, '../specs/swagger.yaml'));
 dotenv.config(); // Load environment variables
 const app = express();
 app.use((0, cors_1.default)());
 app.use(express.json()); // Parse JSON request bodies
 (0, models_1.setupAssociations)(); // Setup model associations
 const port = process.env.PORT || 4000;
-// Register auth routes
-app.use("/auth", authRoutes_1.default); // Routes for /auth/register and /auth/login
-// Use board routes
+// Debugging: Log incoming requests
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
+    next();
+});
+// Register routes with logging
+console.log("Registering routes...");
+app.use("/auth", authRoutes_1.default);
+console.log("/auth registered");
 app.use("/boards", boardRoutes_1.default);
+console.log("/boards registered");
+app.use("/userBoards", userBoardRoutes_1.default);
+console.log("/userBoards registered");
+app.use("/workItems", workItemRoutes_1.default);
+console.log("/workItems registered");
+app.use("/users", userRoutes_1.default);
+console.log("/users registered");
+// Fallback middleware for unhandled routes
+app.use((req, res) => {
+    console.error(`Unhandled route: ${req.method} ${req.originalUrl}`);
+    res.status(404).send({ error: "Route not found" });
+});
 // use getBoards
-app.use("/", boardRoutes_1.default);
+// app.use("/", boardRoutes);
 const startServer = async () => {
     try {
         await db_1.default.authenticate();
         console.log("Database connected.");
-        await db_1.default.sync({ force: true }); // Sync models with the database
+        await db_1.default.sync({ force: false }); // Sync models with the database
         console.log("Database synchronized.");
         app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
     }

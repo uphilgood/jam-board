@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createBoard = exports.getBoards = void 0;
+exports.deleteBoard = exports.updateBoard = exports.createBoard = exports.getBoards = void 0;
 const models_1 = require("../models");
 /**
  * Get all boards that a user has access to
@@ -12,12 +12,15 @@ const getBoards = async (req, res) => {
         return res.status(400).json({ message: "User ID is required" });
     }
     try {
+        // join UserBoard to get all boards that the user has access to and return board info
+        // and the role of the user in the board
         const boards = await models_1.Board.findAll({
             include: {
                 model: models_1.UserBoard,
                 where: { userId: userId },
             },
         });
+        console.log("boards: ", boards);
         res.status(200).json({ boards });
     }
     catch (error) {
@@ -59,3 +62,59 @@ const createBoard = async (req, res) => {
     }
 };
 exports.createBoard = createBoard;
+const updateBoard = async (req, res) => {
+    const { boardId, name, description } = req.body;
+    try {
+        const board = await models_1.Board.findByPk(boardId);
+        if (!board) {
+            return res.status(404).json({ message: "Board not found" });
+        }
+        // Update the board
+        board.name = name || board.name;
+        board.description = description || board.description;
+        await board.save();
+        res.status(200).json({ message: "Board updated successfully", board });
+    }
+    catch (error) {
+        console.error("Error updating board:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+exports.updateBoard = updateBoard;
+const deleteBoard = async (req, res) => {
+    const { userId, boardId } = req.body;
+    // Validate the input
+    if (!userId || !boardId) {
+        return res.status(400).json({ message: "userId and boardId are required" });
+    }
+    try {
+        // Find the board to delete
+        const board = await models_1.Board.findOne({
+            where: { id: boardId },
+        });
+        if (!board) {
+            return res.status(404).json({ message: "Board not found" });
+        }
+        // Check if the user is the owner of the board
+        const userBoard = await models_1.UserBoard.findOne({
+            where: { userId, boardId },
+        });
+        if (!userBoard || userBoard.role !== "owner") {
+            return res.status(403).json({
+                message: "You do not have permission to delete this board",
+            });
+        }
+        // Delete related entries in UserBoard table
+        await models_1.UserBoard.destroy({
+            where: { boardId },
+        });
+        // Delete the board
+        await board.destroy();
+        res.status(200).json({ message: "Board deleted successfully" });
+    }
+    catch (error) {
+        console.error("Error deleting board:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+exports.deleteBoard = deleteBoard;

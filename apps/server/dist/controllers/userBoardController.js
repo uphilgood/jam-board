@@ -7,10 +7,14 @@ const models_1 = require("../models");
  */
 const addUserToBoard = async (req, res) => {
     try {
-        const { boardId, userId, role = "member" } = req.body; // role defaults to "member"
+        const { boardId, username, role = "member" } = req.body; // role defaults to "member"
+        const user = await models_1.User.findOne({ where: { username } });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
         // Check if the user is already associated with the board
         const existingEntry = await models_1.UserBoard.findOne({
-            where: { userId, boardId },
+            where: { userId: user.id, boardId },
         });
         if (existingEntry) {
             return res
@@ -18,7 +22,7 @@ const addUserToBoard = async (req, res) => {
                 .json({ message: "User is already part of this board" });
         }
         // Create a new UserBoard entry
-        await models_1.UserBoard.create({ userId, boardId, role });
+        await models_1.UserBoard.create({ userId: user.id, boardId, role });
         res.status(201).json({ message: "User added to board successfully" });
     }
     catch (error) {

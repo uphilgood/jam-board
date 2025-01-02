@@ -18,9 +18,17 @@ const setupAssociations = () => {
     User_1.default.belongsToMany(Board_1.default, { through: UserBoard_1.default, foreignKey: "userId" });
     // models/Board.ts
     Board_1.default.hasMany(UserBoard_1.default, { foreignKey: "boardId" });
+    Board_1.default.hasMany(WorkItem_1.default, {
+        foreignKey: 'boardId',
+        as: 'workItems',
+    });
     Board_1.default.belongsToMany(User_1.default, { through: UserBoard_1.default, foreignKey: "boardId" });
     // models/UserBoard.ts
     UserBoard_1.default.belongsTo(User_1.default, { foreignKey: "userId" });
     UserBoard_1.default.belongsTo(Board_1.default, { foreignKey: "boardId" });
+    WorkItem_1.default.belongsTo(Board_1.default, {
+        foreignKey: 'boardId',
+        as: 'board',
+    });
 };
 exports.setupAssociations = setupAssociations;
