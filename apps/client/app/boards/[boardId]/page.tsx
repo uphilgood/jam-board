@@ -93,7 +93,7 @@ const JiraBoard: React.FC = () => {
       ...new Set(
         columns.map((column) =>
           column.tasks.map((task) => task.assignedTo)
-        ).flat()
+        ).flat().filter(id => !!id)
       ),
     ];
 
