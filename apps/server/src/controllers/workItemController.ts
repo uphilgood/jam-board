@@ -1,5 +1,5 @@
 import { Request, RequestHandler, Response } from "express";
-import { UserBoard, WorkItem } from "../models";
+import { Board, UserBoard, WorkItem } from "../models";
 
 export const getWorkItems: RequestHandler = async (
   req: Request,
@@ -38,6 +38,21 @@ export const getWorkItemsByBoardId: RequestHandler = async (
 
   if (!boardId) {
     return res.status(400).json({ message: "Board ID is required" });
+  }
+
+  // check if board exists
+  const boardExists = await Board.findByPk(boardId as string);
+  if (!boardExists) {
+    res.status(200).json({ workItems: [], error: "Board not found" });
+  }
+
+  // Check if the user has access to the board
+  const userHasAccess = await UserBoard.findOne({
+    where: { userId, boardId },
+  });
+
+  if (!userHasAccess) {
+    res.status(200).json({ workItems: [], error: "User not authorized" });
   }
 
   try {
