@@ -3,6 +3,8 @@ import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
+const usernameRegex = /^[a-zA-Z0-9]*$/;
+
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -62,7 +64,7 @@ const RegisterPage = () => {
               id="username"
               name="username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => usernameRegex.test(e.target.value) ? setUsername(e.target.value) : null}
               className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />

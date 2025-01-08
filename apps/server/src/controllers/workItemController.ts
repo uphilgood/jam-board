@@ -58,6 +58,12 @@ export const createWorkItem: RequestHandler = async (
     const { boardId, userId, description, title, status, assignedTo } =
       req.body;
 
+    if(!title){
+      return res
+        .status(400)
+        .json({ message: "title is required" });
+    }
+
     // Validate the input
     if (!userId || !boardId) {
       return res
@@ -90,6 +96,12 @@ export const updateWorkItem: RequestHandler = async (
 ): Promise<any> => {
   try {
     const { workItemId, description, title, status, assignedTo } = req.body;
+
+    if(!title){
+      return res
+        .status(400)
+        .json({ message: "title is required" });
+    }
 
     // Validate the input
     if (!workItemId) {

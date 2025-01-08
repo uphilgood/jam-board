@@ -17,10 +17,10 @@ export const DraggableItem = ({ task, index, handleOpenModal }) => {
           {...provided.dragHandleProps}
         >
           <h1 className="text-lg font-semibold text-gray-800">
-            {task.title}
+            {task.title || "Title"}
           </h1>
           <p className="text-sm text-gray-600 mt-2">
-            {task.description}
+            {task.description || "Description"}
           </p>
         </div>
       )}

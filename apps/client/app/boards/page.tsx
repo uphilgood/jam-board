@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../contexts/authContext";
 import { useRouter } from "next/navigation";
-import { FaUserPlus, FaTrashAlt } from "react-icons/fa";
+import { FaUserPlus, FaTrashAlt, FaUsers } from "react-icons/fa";
 import { DeleteModal } from "../components/DeleteModal";
 import { User, UserSearchInput } from "../components/UserSearchInput";
+import { Tooltip } from "react-tooltip";
 
 interface Board {
   id: number;
@@ -15,6 +16,11 @@ interface Board {
   ownerId: number;
   createdAt: string;
   updatedAt: string;
+  Users: {
+    id: number;
+    username: string;
+    email: string;
+  }[]
   UserBoards: {
     id: number;
     userId: number;
@@ -199,8 +205,23 @@ export default function BoardPage() {
                   key={board.id}
                   className="bg-white cursor-pointer shadow-md rounded-lg p-4 hover:shadow-xl transition break-words flex flex-col justify-between h-full"
                 >
-                  <h3 className="text-lg font-semibold mb-2">{board.name}</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold mb-2">{board.name}</h3>
+                    <FaUsers
+                      className="text-gray-600 hover:text-gray-900 cursor-pointer"
+                      data-tooltip-id={`users-tooltip-${board.id}`}
+                    />
 
+                    <Tooltip
+                      id={`users-tooltip-${board.id}`}
+                      place="bottom"
+                      className="max-w-xs p-2 text-sm text-gray-100 bg-gray-800 rounded-lg"
+                    >
+                      {board.Users.length > 0
+                        ? board.Users.map((user) => <p>{user.username}</p>) 
+                        : "No users assigned"}
+                    </Tooltip>
+                  </div>
                   <p className="text-sm text-gray-600 mb-12">
                     {board?.description ?? "No Descriptions"}
                   </p>

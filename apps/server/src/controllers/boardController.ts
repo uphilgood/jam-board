@@ -1,5 +1,5 @@
 import { Request, RequestHandler, Response } from "express";
-import { Board, UserBoard, WorkItem } from "../models";
+import { Board, User, UserBoard, WorkItem } from "../models";
 
 /**
  * Get all boards that a user has access to
@@ -20,10 +20,15 @@ export const getBoards: RequestHandler = async (
     // and the role of the user in the board
 
     const boards = await Board.findAll({
-      include: {
+      include: [{
         model: UserBoard,
         where: { userId: userId },
       },
+      {
+        model: User, // Include the related User model to get users for the same board
+        through: { attributes: [] }, // Exclude the UserBoard attributes (junction table data)
+        attributes: ['id', 'username', 'email'], // Select the user fields you need
+      },]
     });
 
     console.log("boards: ", boards);

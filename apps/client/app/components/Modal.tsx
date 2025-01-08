@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/authContext";
 import { useParams } from "next/navigation";
 import { DeleteModal } from "./DeleteModal";
 import { User, UserSearchInput } from "./UserSearchInput";
+import { FaTimes } from "react-icons/fa";
 
 export const Modal = ({
   selectedColumn,
@@ -24,6 +25,7 @@ export const Modal = ({
   );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [assignedUsername, setAssignedUsername] = useState("");
+  const [error, setError] = useState("")
   const isNew = selectedTask ? false : true;
 
   const fetchUser = async (user) => {
@@ -46,6 +48,7 @@ export const Modal = ({
 
   const handleUpdateWorkItem = async () => {
     try {
+      setError("")
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
         {
@@ -65,11 +68,13 @@ export const Modal = ({
         assignedTo,
       });
     } catch (error) {
+      setError(error.response.data.message)
       console.error("Error updating WorkItem status:", error);
     }
   };
   const handleCreateWorkItem = async () => {
     try {
+      setError("")
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
         {
@@ -85,6 +90,7 @@ export const Modal = ({
       console.log("WorkItem created successfully:", response.data);
       handleCreate(response.data.workItem);
     } catch (error) {
+      setError(error.response.data.message)
       console.error("Error updating WorkItem status:", error);
     }
   };
@@ -114,10 +120,10 @@ export const Modal = ({
       <div className="bg-white rounded-lg w-full max-w-md p-6 shadow-lg relative">
         {/* Close Button */}
         <button
-          className="absolute top-3 right-3 text-gray-600 hover:text-gray-900"
+          className="absolute top-6 right-6 text-gray-600 hover:text-gray-900"
           onClick={handleCloseModal}
         >
-          ×
+          <FaTimes size="20" />
         </button>
 
         {/* Modal Content */}
@@ -136,9 +142,13 @@ export const Modal = ({
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out"
+            className={`w-full p-3 rounded-xl border-2 ${error ? "border-red-500 focus:border-red-500 focus:ring-red-300" : "border-gray-300 focus:border-blue-500 focus:ring-blue-300"
+              } text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out`}
             placeholder="Enter title"
           />
+          {error && (
+            <p className="text-red-500 text-sm mt-2 pl-3">{error}</p>
+          )}
         </div>
 
         <div className="mb-6">
