@@ -55,6 +55,11 @@ exports.getWorkItemsByBoardId = getWorkItemsByBoardId;
 const createWorkItem = async (req, res) => {
     try {
         const { boardId, userId, description, title, status, assignedTo } = req.body;
+        if (!title) {
+            return res
+                .status(400)
+                .json({ message: "title is required" });
+        }
         // Validate the input
         if (!userId || !boardId) {
             return res
@@ -83,6 +88,11 @@ exports.createWorkItem = createWorkItem;
 const updateWorkItem = async (req, res) => {
     try {
         const { workItemId, description, title, status, assignedTo } = req.body;
+        if (!title) {
+            return res
+                .status(400)
+                .json({ message: "title is required" });
+        }
         // Validate the input
         if (!workItemId) {
             return res

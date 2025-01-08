@@ -15,10 +15,15 @@ const getBoards = async (req, res) => {
         // join UserBoard to get all boards that the user has access to and return board info
         // and the role of the user in the board
         const boards = await models_1.Board.findAll({
-            include: {
-                model: models_1.UserBoard,
-                where: { userId: userId },
-            },
+            include: [{
+                    model: models_1.UserBoard,
+                    where: { userId: userId },
+                },
+                {
+                    model: models_1.User, // Include the related User model to get users for the same board
+                    through: { attributes: [] }, // Exclude the UserBoard attributes (junction table data)
+                    attributes: ['id', 'username', 'email'], // Select the user fields you need
+                },]
         });
         console.log("boards: ", boards);
         res.status(200).json({ boards });
