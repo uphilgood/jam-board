@@ -8,6 +8,7 @@ import { useAuth } from "../../contexts/authContext";
 import { Modal } from "../../components/Modal";
 import { Chip } from "../../components/Chip";
 import { DraggableItem } from "../../components/DraggableItem";
+import { has, set } from "lodash";
 
 interface Task {
   id: number;
@@ -36,10 +37,10 @@ interface Column {
 }
 
 type AssignedUsers = {
-  id: number
-  email: string
-  username: string
-}
+  id: number;
+  email: string;
+  username: string;
+};
 
 const initialColumns = [
   {
@@ -76,8 +77,11 @@ const JiraBoard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task>();
   const [selectedColumn, setSelectedColumn] = useState<WorkItemStatusEnum>();
-  const [assignedUsers, setAssignedUsers] = useState<AssignedUsers[]>([])
-  const [selectedAssignedUser, setSelectedAssignedUser] = useState<number | null>()
+  const [assignedUsers, setAssignedUsers] = useState<AssignedUsers[]>([]);
+  const [selectedAssignedUser, setSelectedAssignedUser] = useState<
+    number | null
+  >();
+  const [error, setError] = useState(null);
 
   const fetchAssignedUsers = async (userIds) => {
     const userFetchPromises = userIds.map((userId) =>
@@ -86,14 +90,15 @@ const JiraBoard: React.FC = () => {
     const userResponses = await Promise.all(userFetchPromises);
     const fetchedUsers = userResponses.map((response) => response.data.user);
     setAssignedUsers(fetchedUsers);
-  }
+  };
 
   useEffect(() => {
     const userIds = [
       ...new Set(
-        columns.map((column) =>
-          column.tasks.map((task) => task.assignedTo)
-        ).flat().filter(id => !!id)
+        columns
+          .map((column) => column.tasks.map((task) => task.assignedTo))
+          .flat()
+          .filter((id) => !!id)
       ),
     ];
 
@@ -109,6 +114,13 @@ const JiraBoard: React.FC = () => {
           const response = await axios.get(
             `${process.env.NEXT_PUBLIC_API_URL}/workItems/items?userId=${user.id}&boardId=${boardId}`
           );
+
+          if (response.data.error) {
+            setError({
+              message: response.data.error,
+            });
+          }
+
           const newColumns = columns.map((column) => {
             return {
               ...column,
@@ -144,14 +156,16 @@ const JiraBoard: React.FC = () => {
   };
 
   const handleEdit = async (updatedWorkItem) => {
-    setColumns((prevColumns) => prevColumns.map((column) => ({
-      ...column,
-      tasks: column.tasks.map((task) =>
-        task.id === updatedWorkItem.id
-          ? { ...task, ...updatedWorkItem }
-          : task
-      ),
-    })));
+    setColumns((prevColumns) =>
+      prevColumns.map((column) => ({
+        ...column,
+        tasks: column.tasks.map((task) =>
+          task.id === updatedWorkItem.id
+            ? { ...task, ...updatedWorkItem }
+            : task
+        ),
+      }))
+    );
 
     handleCloseModal();
   };
@@ -260,9 +274,9 @@ const JiraBoard: React.FC = () => {
 
   const handleChipToggle = (userId: number) => {
     if (selectedAssignedUser === userId) {
-      setSelectedAssignedUser(null)
+      setSelectedAssignedUser(null);
     } else {
-      setSelectedAssignedUser(userId)
+      setSelectedAssignedUser(userId);
     }
   };
 
@@ -279,61 +293,74 @@ const JiraBoard: React.FC = () => {
         ))}
       </div>
       <div className="flex items-start gap-4 p-5 bg-gray-100 min-h-screen">
-
-        <DragDropContext onDragEnd={onDragEnd}>
-          {columns.map((column) => (
-            <div key={column.id} className="bg-white rounded-lg shadow-md w-72">
-              <h2 className="bg-blue-500 text-white font-bold py-2 px-4 rounded-t-lg">
-                {column.title}
-              </h2>
-              <Droppable droppableId={column.id}>
-                {(provided) => (
-                  <div
-                    className="p-4 min-h-[150px]"
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                  >
-                    {column.tasks
-                      .filter(task => !selectedAssignedUser || selectedAssignedUser === task.assignedTo)
-                      .map((task, index) => (
-                        <DraggableItem
-                          key={task.id}
-                          task={task}
-                          index={index}
-                          handleOpenModal={handleOpenModal}
-                        />
-                      ))}
-                    {provided.placeholder}
-
+        {error ? (
+          <>{error.message}</>
+        ) : (
+          <DragDropContext onDragEnd={onDragEnd}>
+            {columns.map((column) => (
+              <div
+                key={column.id}
+                className="bg-white rounded-lg shadow-md w-72"
+              >
+                <h2 className="bg-blue-500 text-white font-bold py-2 px-4 rounded-t-lg">
+                  {column.title}
+                </h2>
+                <Droppable droppableId={column.id}>
+                  {(provided) => (
                     <div
-                      onClick={() => handleOpenModal({ status: column.status })}
-                      className="bg-gray-50 hover:bg-gray-100 border border-dashed border-gray-300 rounded-md p-2 mb-2 flex items-center justify-center cursor-pointer transition-all"
+                      className="p-4 min-h-[150px]"
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
+                      {column.tasks
+                        .filter(
+                          (task) =>
+                            !selectedAssignedUser ||
+                            selectedAssignedUser === task.assignedTo
+                        )
+                        .map((task, index) => (
+                          <DraggableItem
+                            key={task.id}
+                            task={task}
+                            index={index}
+                            handleOpenModal={handleOpenModal}
+                          />
+                        ))}
+                      {provided.placeholder}
+
+                      <div
+                        onClick={() =>
+                          handleOpenModal({ status: column.status })
+                        }
+                        className="bg-gray-50 hover:bg-gray-100 border border-dashed border-gray-300 rounded-md p-2 mb-2 flex items-center justify-center cursor-pointer transition-all"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                      <span className="ml-2 text-sm text-gray-500">
-                        Add Work Item
-                      </span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 4v16m8-8H4"
+                          />
+                        </svg>
+                        <span className="ml-2 text-sm text-gray-500">
+                          Add Work Item
+                        </span>
+                      </div>
+                      {/* {provided.placeholder} */}
                     </div>
-                    {/* {provided.placeholder} */}
-                  </div>
-                )}
-              </Droppable>
-            </div>
-          ))}
-        </DragDropContext>
+                  )}
+                </Droppable>
+              </div>
+            ))}
+          </DragDropContext>
+        )}
+
         {isModalOpen ? (
           <Modal
             selectedColumn={selectedColumn}
@@ -344,7 +371,8 @@ const JiraBoard: React.FC = () => {
             handleDelete={handleDelete}
           />
         ) : null}
-      </div></>
+      </div>
+    </>
   );
 };
 
