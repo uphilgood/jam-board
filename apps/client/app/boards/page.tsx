@@ -218,7 +218,7 @@ export default function BoardPage() {
                       className="max-w-xs p-2 text-sm text-gray-100 bg-gray-800 rounded-lg"
                     >
                       {board.Users.length > 0
-                        ? board.Users.map((user) => <p>{user.username}</p>) 
+                        ? board.Users.map((user) => <p key={user.email}>{user.username}</p>) 
                         : "No users assigned"}
                     </Tooltip>
                   </div>

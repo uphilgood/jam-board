@@ -294,7 +294,7 @@ const JiraBoard: React.FC = () => {
       </div>
       <div className="flex items-start gap-4 p-5 bg-gray-100 min-h-screen">
         {error ? (
-          <>{error.message}</>
+          <div className="flex flex-grow justify-center">{error.message}</div>
         ) : (
           <DragDropContext onDragEnd={onDragEnd}>
             {columns.map((column) => (
