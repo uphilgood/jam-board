@@ -33,28 +33,33 @@ const getWorkItemsByBoardId = async (req, res) => {
     // check if board exists
     const boardExists = await models_1.Board.findByPk(boardId);
     if (!boardExists) {
-        res.status(200).json({ workItems: [], error: "Board not found" });
+        return res.status(200).json({ workItems: [], error: "Board not found" });
     }
     // Check if the user has access to the board
     const userHasAccess = await models_1.UserBoard.findOne({
         where: { userId, boardId },
     });
     if (!userHasAccess) {
-        res.status(200).json({ workItems: [], error: "User not authorized" });
+        return res.status(200).json({ workItems: [], error: "User not authorized" });
     }
     try {
         const workItems = await models_1.WorkItem.findAll({ where: { boardId: boardId } });
-        res.status(200).json({ workItems });
+        return res.status(200).json({ workItems });
     }
     catch (error) {
         console.error("Error fetching workItems:", error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 };
 exports.getWorkItemsByBoardId = getWorkItemsByBoardId;
 const createWorkItem = async (req, res) => {
     try {
         const { boardId, userId, description, title, status, assignedTo } = req.body;
+        if (!title) {
+            return res
+                .status(400)
+                .json({ message: "title is required" });
+        }
         // Validate the input
         if (!userId || !boardId) {
             return res
@@ -83,6 +88,11 @@ exports.createWorkItem = createWorkItem;
 const updateWorkItem = async (req, res) => {
     try {
         const { workItemId, description, title, status, assignedTo } = req.body;
+        if (!title) {
+            return res
+                .status(400)
+                .json({ message: "title is required" });
+        }
         // Validate the input
         if (!workItemId) {
             return res

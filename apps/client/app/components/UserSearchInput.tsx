@@ -65,18 +65,20 @@ export const UserSearchInput = ({ selectedBoard, onSelectUser }) => {
               <button
                 disabled={isDisabled}
                 onClick={() => onSelect(suggestionUser)} // Disable click if isDisabled is true
-                className={`w-full text-left p-2 ${
-                  isDisabled
+                className={`w-full text-left p-2 ${isDisabled
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-200"
-                }`}
+                  }`}
               >
-                {suggestionUser.username}
-                {isDisabled && (
+                <div>
+                  <span className="block font-medium">{suggestionUser.username}  {isDisabled && (
                   <span className="text-xs text-gray-500 ml-2">
                     (Already assigned)
                   </span>
-                )}
+                )}</span>
+                  <span className="block text-sm text-gray-500">{suggestionUser.email}</span>
+                </div>
+               
                 {isSelected && (
                   <span className="ml-2 text-green-500">✔</span> // Add a checkmark when selected
                 )}
