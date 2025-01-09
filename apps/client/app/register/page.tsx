@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/authContext";
 
 const usernameRegex = /^[a-zA-Z0-9]*$/;
 
@@ -12,7 +13,14 @@ const RegisterPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
+  useEffect(() => {
+    if (!!user) {
+      router.push("/boards");
+    }
+  }, [user]);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

@@ -17,7 +17,7 @@ export default function LoginPage() {
     if (!!user) {
       router.push("/boards");
     }
-  }, []);
+  }, [user]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,7 +46,7 @@ export default function LoginPage() {
     }
   };
 
-  return (
+  return user ? null : (
     <div className="flex h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white shadow-md rounded-lg">
         <h2 className="text-2xl font-bold text-center mb-6">
