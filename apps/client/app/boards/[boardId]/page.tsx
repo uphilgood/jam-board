@@ -282,14 +282,13 @@ const JiraBoard: React.FC = () => {
 
   return (
     <>
-
       <div>
         <h3 className="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight leading-tight sm:leading-tight">
           {board?.name ?? "No Title"}
         </h3>
-        <p className="mb-2 text-lg sm:text-xl text-gray-600">
+        {/* <p className="mb-2 truncate text-lg sm:text-xl text-gray-600">
           {board?.description ?? "No Description"}
-        </p>
+        </p> */}
       </div>
       <div className="flex items-center gap-2 mb-4">
         {assignedUsers.map((user) => (
