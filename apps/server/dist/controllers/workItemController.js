@@ -44,7 +44,7 @@ const getWorkItemsByBoardId = async (req, res) => {
     }
     try {
         const workItems = await models_1.WorkItem.findAll({ where: { boardId: boardId } });
-        return res.status(200).json({ workItems });
+        return res.status(200).json({ workItems, board: boardExists });
     }
     catch (error) {
         console.error("Error fetching workItems:", error);

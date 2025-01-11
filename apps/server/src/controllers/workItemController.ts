@@ -58,7 +58,7 @@ export const getWorkItemsByBoardId: RequestHandler = async (
   try {
     const workItems = await WorkItem.findAll({ where: { boardId: boardId } });
 
-    return res.status(200).json({ workItems });
+    return res.status(200).json({ workItems, board: boardExists });
   } catch (error) {
     console.error("Error fetching workItems:", error);
     return res.status(500).json({ message: "Server error" });

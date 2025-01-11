@@ -13,14 +13,14 @@ export const DraggableItem = ({ task, index, handleOpenModal }) => {
           {...provided.dragHandleProps}
         >
           {task?.title ? (
-            <h1 className="text-lg font-semibold text-gray-800">
+            <h1 className="text-lg font-semibold text-gray-800 truncate">
               {task.title}
             </h1>
           ) : (
             <h1 className="text-lg font-semibold text-gray-400"> No Title </h1>
           )}
           {task?.description ? (
-            <p className="text-sm text-gray-600 mt-2">{task.description}</p>
+            <p className="text-sm text-gray-600 mt-2 truncate">{task.description}</p>
           ) : (
             <p className="text-sm text-gray-400 mt-2"> No Description </p>
           )}

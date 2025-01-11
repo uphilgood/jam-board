@@ -165,10 +165,11 @@ export default function BoardPage() {
                 <input
                   type="text"
                   id="boardName"
+                  maxLength={30}
                   value={newBoardName}
                   onChange={(e) => setNewBoardName(e.target.value)}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Enter board name"
+                  placeholder="Enter board name (max 30 characters)"
                 />
               </div>
 
@@ -181,10 +182,11 @@ export default function BoardPage() {
                 </label>
                 <textarea
                   id="boardDescription"
+                  maxLength={250}
                   value={newBoardDescription}
                   onChange={(e) => setNewBoardDescription(e.target.value)}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Enter a short description (optional)"
+                  placeholder="Enter a short description (max 250 characters)"
                 ></textarea>
               </div>
 
@@ -206,9 +208,18 @@ export default function BoardPage() {
                   className="bg-white cursor-pointer shadow-md rounded-lg p-4 hover:shadow-xl transition break-words flex flex-col justify-between h-full"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold mb-2">{board.name}</h3>
+                    <h3 
+                    className="text-lg font-semibold mb-2 truncate" 
+                    data-tooltip-id={`users-tooltip-${board.name}`}>{board.name}</h3>
+                    <Tooltip
+                      id={`users-tooltip-${board.name}`}
+                      place="bottom"
+                      className="max-w-xs p-2 text-sm text-gray-100 bg-gray-800 rounded-lg"
+                    >
+                      {board.name}
+                    </Tooltip>
                     <FaUsers
-                      className="text-gray-600 hover:text-gray-900 cursor-pointer"
+                      className="text-gray-600 hover:text-gray-900 cursor-pointer ml-2"
                       data-tooltip-id={`users-tooltip-${board.id}`}
                     />
 
@@ -217,18 +228,27 @@ export default function BoardPage() {
                       place="bottom"
                       className="max-w-xs p-2 text-sm text-gray-100 bg-gray-800 rounded-lg"
                     >
-                      {board.Users.length > 0
+                      {board.Users?.length > 0
                         ? board.Users.map((user) => <p key={user.email}>{user.username}</p>) 
                         : "No users assigned"}
                     </Tooltip>
                   </div>
-                  <p className="text-sm text-gray-600 mb-12">
+                  <p className="text-sm text-gray-600 mb-12 truncate"
+                  data-tooltip-id={`users-description-${board.description}`}>
                     {board?.description ?? "No Descriptions"}
                   </p>
+                  <Tooltip
+                      id={`users-description-${board.description}`}
+                      place="bottom-start"
+                      className="max-w-xs p-2 text-sm text-gray-100 bg-gray-800 rounded-lg"
+                    >
+                      {board.description}
+                    </Tooltip>
 
                   {/* Always show icons at the bottom */}
+                  <div className="flex items-center mt-4 space-x-2 mt-auto">
                   {board.ownerId === user?.id && (
-                    <div className="flex items-center mt-4 space-x-2 mt-auto">
+                      <>
                       <button
                         onClick={(e) => handleOpenModal(e, board)}
                         className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
@@ -241,9 +261,9 @@ export default function BoardPage() {
                         className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition"
                       >
                         <FaTrashAlt className="text-lg" />
-                      </button>
-                    </div>
+                      </button></>
                   )}
+                  </div>
                 </div>
               ))}
             </div>

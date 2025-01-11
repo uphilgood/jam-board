@@ -1,6 +1,6 @@
 "use client";
 
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -8,7 +8,6 @@ import { useAuth } from "../../contexts/authContext";
 import { Modal } from "../../components/Modal";
 import { Chip } from "../../components/Chip";
 import { DraggableItem } from "../../components/DraggableItem";
-import { has, set } from "lodash";
 
 interface Task {
   id: number;
@@ -82,6 +81,7 @@ const JiraBoard: React.FC = () => {
     number | null
   >();
   const [error, setError] = useState(null);
+  const [board, setBoard] = useState(null)
 
   const fetchAssignedUsers = async (userIds) => {
     const userFetchPromises = userIds.map((userId) =>
@@ -120,7 +120,6 @@ const JiraBoard: React.FC = () => {
               message: response.data.error,
             });
           }
-
           const newColumns = columns.map((column) => {
             return {
               ...column,
@@ -130,6 +129,7 @@ const JiraBoard: React.FC = () => {
             };
           });
           setColumns(newColumns);
+          setBoard(response.data.board)
         } catch (error) {
           console.error("Error fetching boards:", error);
         }
@@ -282,6 +282,15 @@ const JiraBoard: React.FC = () => {
 
   return (
     <>
+
+      <div>
+        <h3 className="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight leading-tight sm:leading-tight">
+          {board?.name ?? "No Title"}
+        </h3>
+        <p className="mb-2 text-lg sm:text-xl text-gray-600">
+          {board?.description ?? "No Description"}
+        </p>
+      </div>
       <div className="flex items-center gap-2 mb-4">
         {assignedUsers.map((user) => (
           <Chip
@@ -292,7 +301,7 @@ const JiraBoard: React.FC = () => {
           />
         ))}
       </div>
-      <div className="flex items-start gap-4 p-5 bg-gray-100 min-h-screen">
+      <div className="flex items-start gap-4 bg-gray-100 min-h-screen">
         {error ? (
           <div className="flex flex-grow justify-center">{error.message}</div>
         ) : (
@@ -327,7 +336,6 @@ const JiraBoard: React.FC = () => {
                           />
                         ))}
                       {provided.placeholder}
-
                       <div
                         onClick={() =>
                           handleOpenModal({ status: column.status })

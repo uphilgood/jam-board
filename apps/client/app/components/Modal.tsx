@@ -49,12 +49,13 @@ export const Modal = ({
   const handleUpdateWorkItem = async () => {
     try {
       setError("")
+      const trimTitle = title.trim()
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
         {
           ...selectedTask,
           workItemId: selectedTask.id,
-          title,
+          title: trimTitle,
           description,
           assignedTo,
         }
@@ -63,7 +64,7 @@ export const Modal = ({
       console.log("WorkItem updated successfully:", response.data);
       handleEdit({
         ...selectedTask,
-        title,
+        title: trimTitle,
         description,
         assignedTo,
       });
@@ -78,7 +79,7 @@ export const Modal = ({
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/workItems`,
         {
-          title,
+          title: title.trim(),
           description,
           status: selectedColumn,
           boardId,
@@ -141,10 +142,11 @@ export const Modal = ({
             type="text"
             id="title"
             value={title}
+            maxLength={30}
             onChange={(e) => setTitle(e.target.value)}
             className={`w-full p-3 rounded-xl border-2 ${error ? "border-red-500 focus:border-red-500 focus:ring-red-300" : "border-gray-300 focus:border-blue-500 focus:ring-blue-300"
               } text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out`}
-            placeholder="Enter title"
+            placeholder="Enter title (max 30 characters)"
           />
           {error && (
             <p className="text-red-500 text-sm mt-2 pl-3">{error}</p>
@@ -161,9 +163,10 @@ export const Modal = ({
           <textarea
             id="description"
             value={description}
+            maxLength={250}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 text-gray-800 placeholder-gray-500 transition duration-300 ease-in-out"
-            placeholder="Enter description"
+            placeholder="Enter description (max 250 characters)"
             rows={5}
           />
         </div>
