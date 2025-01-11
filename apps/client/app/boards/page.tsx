@@ -132,6 +132,12 @@ export default function BoardPage() {
     }
   };
 
+  const handleBoardCreation = () => {
+    setNewBoardName("")
+    setNewBoardDescription("")
+    setIsCreatingBoard(!isCreatingBoard)
+  }
+
   return (
     <div className="flex h-screen">
       <div className="flex flex-col flex-1">
@@ -139,7 +145,7 @@ export default function BoardPage() {
         <div className="flex justify-between items-center p-6 bg-white shadow-md fixed top-0 left-64 right-0 z-10">
           <h1 className="text-2xl font-bold">My Boards</h1>
           <button
-            onClick={() => setIsCreatingBoard(!isCreatingBoard)}
+            onClick={handleBoardCreation}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
           >
             {isCreatingBoard ? "Cancel" : "Create Board"}
