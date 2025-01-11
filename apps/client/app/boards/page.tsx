@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../contexts/authContext";
 import { useRouter } from "next/navigation";
-import { FaUserPlus, FaTrashAlt, FaUsers } from "react-icons/fa";
-import { DeleteModal } from "../components/DeleteModal";
+import { FaUserPlus, FaTrashAlt, FaUsers, FaEdit } from "react-icons/fa";
+import { DeleteModal } from "../components/Modal/DeleteModal";
 import { User, UserSearchInput } from "../components/UserSearchInput";
 import { Tooltip } from "react-tooltip";
 
@@ -249,6 +249,12 @@ export default function BoardPage() {
                   <div className="flex items-center mt-4 space-x-2 mt-auto">
                   {board.ownerId === user?.id && (
                       <>
+                      {/* <button
+                        onClick={(e) => handleDeleteConfirmationModal(e, board)}
+                        className="bg-green-500 text-white p-2 rounded hover:bg-red-600 transition"
+                      >
+                        <FaEdit className="text-lg" />
+                      </button> */}
                       <button
                         onClick={(e) => handleOpenModal(e, board)}
                         className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
@@ -261,7 +267,8 @@ export default function BoardPage() {
                         className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition"
                       >
                         <FaTrashAlt className="text-lg" />
-                      </button></>
+                      </button>
+                      </>
                   )}
                   </div>
                 </div>

@@ -5,9 +5,10 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/authContext";
-import { Modal } from "../../components/Modal";
+import { Modal } from "../../components/Modal/Modal";
 import { Chip } from "../../components/Chip";
 import { DraggableItem } from "../../components/DraggableItem";
+import { DescriptionModal } from "../../components/Modal/DescriptionModal";
 
 interface Task {
   id: number;
@@ -74,6 +75,7 @@ const JiraBoard: React.FC = () => {
   const { boardId } = useParams();
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task>();
   const [selectedColumn, setSelectedColumn] = useState<WorkItemStatusEnum>();
   const [assignedUsers, setAssignedUsers] = useState<AssignedUsers[]>([]);
@@ -286,9 +288,12 @@ const JiraBoard: React.FC = () => {
         <h3 className="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight leading-tight sm:leading-tight">
           {board?.name ?? "No Title"}
         </h3>
-        {/* <p className="mb-2 truncate text-lg sm:text-xl text-gray-600">
-          {board?.description ?? "No Description"}
-        </p> */}
+        <button
+          onClick={() => setIsDescriptionModalOpen(true)}
+          className="text-gray-600 text-lg sm:text-xl underline hover:text-blue-600 transition-all"
+        >
+          Click to see description
+        </button>
       </div>
       <div className="flex items-center gap-2 mb-4">
         {assignedUsers.map((user) => (
@@ -378,6 +383,8 @@ const JiraBoard: React.FC = () => {
             handleDelete={handleDelete}
           />
         ) : null}
+
+        {isDescriptionModalOpen ? <DescriptionModal description={board?.description} isOpen={isDescriptionModalOpen} handleCloseModal={() => setIsDescriptionModalOpen(false)} /> : null}
       </div>
     </>
   );

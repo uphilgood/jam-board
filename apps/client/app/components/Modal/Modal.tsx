@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../contexts/authContext";
+import { useAuth } from "../../contexts/authContext";
 import { useParams } from "next/navigation";
 import { DeleteModal } from "./DeleteModal";
-import { User, UserSearchInput } from "./UserSearchInput";
+import { User, UserSearchInput } from "../UserSearchInput";
 import { FaTimes } from "react-icons/fa";
 
 export const Modal = ({
