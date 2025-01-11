@@ -283,8 +283,9 @@ const JiraBoard: React.FC = () => {
   };
 
   return (
-    <>
-      <div className="mb-4">
+    <div className="flex flex-col h-screen bg-gray-100">
+      {/* Header Section */}
+      <div className="flex-shrink-0 mb-4 p-4 bg-white shadow">
         <h3 className="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight leading-tight sm:leading-tight">
           {board?.name ?? "No Title"}
         </h3>
@@ -295,7 +296,9 @@ const JiraBoard: React.FC = () => {
           Click to see description
         </button>
       </div>
-      <div className="flex items-center gap-2 mb-4">
+  
+      {/* Filter Section */}
+      <div className="flex-shrink-0 flex items-center gap-2 px-4 mb-4">
         {assignedUsers.map((user) => (
           <Chip
             key={user.id}
@@ -305,89 +308,102 @@ const JiraBoard: React.FC = () => {
           />
         ))}
       </div>
-      <div className="flex items-start gap-4 bg-gray-100 min-h-screen">
+  
+      {/* Main Content */}
+      <div className="flex-grow overflow-auto px-4">
         {error ? (
-          <div className="flex flex-grow justify-center">{error.message}</div>
+          <div className="flex flex-grow justify-center items-center">
+            {error.message}
+          </div>
         ) : (
           <DragDropContext onDragEnd={onDragEnd}>
-            {columns.map((column) => (
-              <div
-                key={column.id}
-                className="bg-white rounded-lg shadow-md w-72"
-              >
-                <h2 className="bg-blue-500 text-white font-bold py-2 px-4 rounded-t-lg">
-                  {column.title}
-                </h2>
-                <Droppable droppableId={column.id}>
-                  {(provided) => (
-                    <div
-                      className="p-4 min-h-[150px]"
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                    >
-                      {column.tasks
-                        .filter(
-                          (task) =>
-                            !selectedAssignedUser ||
-                            selectedAssignedUser === task.assignedTo
-                        )
-                        .map((task, index) => (
-                          <DraggableItem
-                            key={task.id}
-                            task={task}
-                            index={index}
-                            handleOpenModal={handleOpenModal}
-                          />
-                        ))}
-                      {provided.placeholder}
+            <div className="flex gap-4 mb-4">
+              {columns.map((column) => (
+                <div
+                  key={column.id}
+                  className="flex flex-col bg-white rounded-lg shadow-md w-72"
+                >
+                  <h2 className="bg-blue-500 text-white font-bold py-2 px-4 rounded-t-lg">
+                    {column.title}
+                  </h2>
+                  <Droppable droppableId={column.id}>
+                    {(provided) => (
                       <div
-                        onClick={() =>
-                          handleOpenModal({ status: column.status })
-                        }
-                        className="bg-gray-50 hover:bg-gray-100 border border-dashed border-gray-300 rounded-md p-2 mb-2 flex items-center justify-center cursor-pointer transition-all"
+                        className="p-4 flex-grow min-h-[150px] overflow-auto"
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-gray-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
+                        {column.tasks
+                          .filter(
+                            (task) =>
+                              !selectedAssignedUser ||
+                              selectedAssignedUser === task.assignedTo
+                          )
+                          .map((task, index) => (
+                            <DraggableItem
+                              key={task.id}
+                              task={task}
+                              index={index}
+                              handleOpenModal={handleOpenModal}
+                            />
+                          ))}
+                        {provided.placeholder}
+                        <div
+                          onClick={() =>
+                            handleOpenModal({ status: column.status })
+                          }
+                          className="bg-gray-50 hover:bg-gray-100 border border-dashed border-gray-300 rounded-md p-2 mb-2 flex items-center justify-center cursor-pointer transition-all"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 4v16m8-8H4"
-                          />
-                        </svg>
-                        <span className="ml-2 text-sm text-gray-500">
-                          Add Work Item
-                        </span>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-gray-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
+                          <span className="ml-2 text-sm text-gray-500">
+                            Add Work Item
+                          </span>
+                        </div>
                       </div>
-                      {/* {provided.placeholder} */}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            ))}
+                    )}
+                  </Droppable>
+                </div>
+              ))}
+            </div>
           </DragDropContext>
         )}
-
-        {isModalOpen ? (
-          <Modal
-            selectedColumn={selectedColumn}
-            handleEdit={handleEdit}
-            selectedTask={selectedTask}
-            handleCloseModal={handleCloseModal}
-            handleCreate={handleCreate}
-            handleDelete={handleDelete}
-          />
-        ) : null}
-
-        {isDescriptionModalOpen ? <DescriptionModal description={board?.description} isOpen={isDescriptionModalOpen} handleCloseModal={() => setIsDescriptionModalOpen(false)} /> : null}
       </div>
-    </>
+  
+      {/* Modals */}
+      {isModalOpen && (
+        <Modal
+          selectedColumn={selectedColumn}
+          handleEdit={handleEdit}
+          selectedTask={selectedTask}
+          handleCloseModal={handleCloseModal}
+          handleCreate={handleCreate}
+          handleDelete={handleDelete}
+        />
+      )}
+      {/* Description Modals */}
+      {isDescriptionModalOpen && (
+        <DescriptionModal
+          description={board?.description}
+          isOpen={isDescriptionModalOpen}
+          handleCloseModal={() => setIsDescriptionModalOpen(false)}
+        />
+      )}
+    </div>
   );
+  
 };
 
 export default JiraBoard;
