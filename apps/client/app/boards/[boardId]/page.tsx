@@ -284,7 +284,7 @@ const JiraBoard: React.FC = () => {
 
   return (
     <>
-      <div>
+      <div className="mb-4">
         <h3 className="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight leading-tight sm:leading-tight">
           {board?.name ?? "No Title"}
         </h3>
