@@ -40,7 +40,7 @@ const RegisterPage = () => {
       }
     } catch (err) {
       console.error("Register error:", err);
-      setError("Failed to register. Please try again.");
+      setError(err.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -91,6 +91,10 @@ const RegisterPage = () => {
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onInvalid={(e) => {
+                e.preventDefault(); // Prevent default browser error
+                setError("Please enter a valid email address.");
+              }}
               className="w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
